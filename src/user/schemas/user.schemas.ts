@@ -4,7 +4,15 @@ import { ExamType, ProficiencyLevel, SkillEnum, UserRole } from 'src/utils/const
 
 export type UserDocument = HydratedDocument<User>;
 
-@Schema({ timestamps: true }) // tự động thêm createdAt và updatedAt
+@Schema({
+    timestamps: true,
+    toJSON: {
+        transform: (doc: any, ret: any) => {
+            delete ret.refreshTokenHash; // không trả về trường refreshTokenHash => nếu dùng this.userModel.findOne({ email }).select('+refreshTokenHash'); 
+            return ret;
+        }
+    }
+})
 export class User {
 
     @Prop({ required: true, unique: true, lowercase: true, trim: true })
@@ -15,6 +23,12 @@ export class User {
 
     @Prop({ default: null })
     avatar_url: string;
+
+    @Prop()
+    googleId: string;
+
+    @Prop({ default: null })
+    refreshTokenHash: string;
 
     @Prop({
         type: String,
@@ -55,4 +69,4 @@ export class User {
 export const UserSchema = SchemaFactory.createForClass(User);
 
 UserSchema.index({ email: 1 }); // Tạo index trên trường email để tăng tốc độ truy vấn
-UserSchema.index({ role: 1 }); // Tạo index trên trường role để tăng tốc độ truy vấn
+UserSchema.index({ googleId: 1 }); // Tạo index trên trường googleId để tăng tốc độ truy vấn
