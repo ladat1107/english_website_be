@@ -48,10 +48,13 @@ export class SpeakingExam {
     topic: string;
 
     @Prop({ required: true, type: Number, min: 1 })
-    estimated_duration_minutes: number;
+    estimated_duration_minutes: number; // Tính bằng phút
 
     @Prop({ required: true, type: String })
     video_url: string;
+
+    @Prop({ required: false, type: String, default: null })
+    thumbnail: string;
 
     @Prop({ type: [VideoScriptSchema], default: [] })
     video_script: VideoScript[];

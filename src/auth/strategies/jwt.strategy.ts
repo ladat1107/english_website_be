@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
+import { JwtPayload } from '../auth.service';
 
 /**
  * Hàm extract JWT từ cookie
@@ -30,7 +31,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         });
     }
 
-    async validate(payload: any) {
+    async validate(payload: JwtPayload) {
         // Payload là thông tin giải mã từ JWT
         if (!payload || !payload._id) {
             throw new UnauthorizedException("Token không hợp lệ");

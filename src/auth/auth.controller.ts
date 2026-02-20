@@ -66,7 +66,7 @@ export class AuthController {
   @Public()
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  async googleAuthCallback(@Req() req: any, @Res({ passthrough: true }) res: Response) {
+  async googleAuthCallback(@Req() req: any, @Res() res: Response) {
     try {
       const googleUser = req.user as {
         googleId: string;
@@ -97,7 +97,7 @@ export class AuthController {
       }
 
       // Redirect về FE (không gửi token qua URL - bảo mật hơn)
-      return res.redirect(`${frontendUrl}${redirectPath}?login=success&user=${encodeURIComponent(JSON.stringify({ user }))}`);
+      return res.redirect(`${frontendUrl}${redirectPath}?login=success&user=${encodeURIComponent(JSON.stringify(user))}`);
     } catch (error) {
       console.error('Google callback error:', error);
       const frontendUrl = this.configService.get<string>('auth.frontendUrl');

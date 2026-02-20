@@ -8,7 +8,7 @@ export class PaginationMetaDto {
     currentPage: number;
 
     @ApiProperty({ example: 10, description: 'Số item trên 1 trang' })
-    itemsPerPage: number;
+    limit: number;
 
     @ApiProperty({ example: 100, description: 'Tổng số item' })
     totalItems: number;
@@ -37,5 +37,37 @@ export class PaginatedResponseDto<T> {
         description: 'Metadata phân trang',
         type: PaginationMetaDto,
     })
-    meta: PaginationMetaDto;
+    pagination: PaginationMetaDto;
+}
+
+export function createPaginatedResponse<T>(
+    items: T[],
+    totalItems: number,
+    page: number,
+    limit: number,
+): PaginatedResponseDto<T> {
+    const totalPages = Math.ceil(totalItems / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    const pagination: PaginationMetaDto = {
+        currentPage: page,
+        limit,
+        totalItems,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage,
+    };
+
+    return {
+        items,
+        pagination: pagination,
+    };
+}
+
+/**
+ * Tính skip offset cho MongoDB
+ */
+export function calculateSkip(page: number, limit: number): number {
+    return (page - 1) * limit;
 }

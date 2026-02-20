@@ -13,7 +13,7 @@ import { ApiResponse } from '../dto/api-response.dto';
  * Exception Filter toàn cục
  * Bắt TẤT CẢ exception và format thành ApiResponse chuẩn
  */
-@Catch()
+@Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
     private readonly logger = new Logger(HttpExceptionFilter.name);
 
@@ -68,6 +68,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
         };
 
         // Trả về response với status code tương ứng
-        response.status(status).json(errorResponse);
+        return response.status(status).json(errorResponse);
     }
 }

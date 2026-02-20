@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -18,7 +18,7 @@ export class UsersService {
       return createdUser.save();
     } catch (error) {
       console.error(error);
-      throw new NotFoundException('Lỗi khi tạo người dùng');
+      throw new InternalServerErrorException('Lỗi khi tạo người dùng');
     }
   }
 
@@ -67,7 +67,7 @@ export class UsersService {
 
     } catch (error) {
       console.error(error);
-      throw new NotFoundException('Error in findOrCreateByGoogle');
+      throw new InternalServerErrorException('Error in findOrCreateByGoogle');
     }
   }
 
@@ -86,7 +86,7 @@ export class UsersService {
       await this.userModel.findByIdAndUpdate(userId, { refreshTokenHash: refreshTokenHash });
     } catch (error) {
       console.error(error);
-      throw new NotFoundException('Error updating refresh token');
+      throw new InternalServerErrorException('Error updating refresh token');
     }
   }
 

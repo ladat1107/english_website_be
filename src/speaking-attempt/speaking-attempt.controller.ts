@@ -1,15 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { SpeakingAttemptService } from './speaking-attempt.service';
 import { CreateSpeakingAttemptDto } from './dto/create-speaking-attempt.dto';
 import { UpdateSpeakingAttemptDto } from './dto/update-speaking-attempt.dto';
 
 @Controller('speaking-attempt')
 export class SpeakingAttemptController {
-  constructor(private readonly speakingAttemptService: SpeakingAttemptService) {}
+  constructor(private readonly speakingAttemptService: SpeakingAttemptService) { }
 
   @Post()
-  create(@Body() createSpeakingAttemptDto: CreateSpeakingAttemptDto) {
-    return this.speakingAttemptService.create(createSpeakingAttemptDto);
+  create(
+    @Req() req: any,
+    @Body() createSpeakingAttemptDto: any
+  ) {
+    return this.speakingAttemptService.create(createSpeakingAttemptDto, req.user);
   }
 
   @Get()

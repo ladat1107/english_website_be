@@ -30,7 +30,8 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true, // Truyền thừa thuộc tính tự động bị loại bỏ
-    forbidNonWhitelisted: true, // Nếu có thuộc tính không hợp lệ, trả về lỗi
+    forbidNonWhitelisted: false, // Nếu có thuộc tính không hợp lệ, khong ném lỗi
+    transform: true, // Tự động chuyển đổi payload thành các kiểu dữ liệu mong muốn trong DTO
   }));
 
   app.useGlobalFilters(new HttpExceptionFilter());
