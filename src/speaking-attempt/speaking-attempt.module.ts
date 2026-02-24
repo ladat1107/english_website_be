@@ -8,7 +8,7 @@ import { SpeakingAnswerModule } from '@/speaking-answer/speaking-answer.module';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: 'SpeakingAttempt', schema: SpeakingAttemptSchema }]),
-    SpeakingAnswerModule
+    SpeakingAnswerModule,
   ],
   controllers: [SpeakingAttemptController],
   providers: [SpeakingAttemptService],

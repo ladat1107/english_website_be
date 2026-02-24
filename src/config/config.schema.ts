@@ -19,6 +19,8 @@ export const configValidationSchema = Joi.object({
 
     FRONTEND_URL: Joi.string().required(),
 
+    GROQ_API_KEY: Joi.string().required(),
+
     // MAIL_HOST: Joi.string().required(),
     // MAIL_USER: Joi.string().required(),
     // MAIL_PASS: Joi.string().required(),

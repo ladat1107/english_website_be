@@ -20,6 +20,7 @@ import { AuthModule } from './auth/auth.module';
 import { configValidationSchema } from './config/config.schema';
 import appConfig from '@/config/app.config';
 import authConfig from '@/config/auth.config';
+import groqConfig from '@/config/groq.config';
 import dbConfig from '@/config/db.config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
@@ -28,7 +29,7 @@ import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, authConfig, dbConfig],
+      load: [appConfig, authConfig, dbConfig, groqConfig],
       validationSchema: configValidationSchema
     }),
     MongooseModule.forRootAsync({

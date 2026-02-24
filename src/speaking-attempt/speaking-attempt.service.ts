@@ -3,7 +3,7 @@ import { CreateSpeakingAttemptDto } from './dto/create-speaking-attempt.dto';
 import { UpdateSpeakingAttemptDto } from './dto/update-speaking-attempt.dto';
 import { JwtPayload } from '@/auth/auth.service';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { Connection, Model } from 'mongoose';
+import { Connection, Model, Types } from 'mongoose';
 import { SpeakingAnswerService } from '@/speaking-answer/speaking-answer.service';
 import { SpeakingAttempt } from './schemas/speaking-attempt.schemas';
 import { ExamAttemptStatus, UserRole } from '@/utils/constants/enum';
@@ -20,43 +20,65 @@ export class SpeakingAttemptService {
   ) { }
 
   async create(createSpeakingAttemptDto: CreateSpeakingAttemptDto, user: JwtPayload) {
-    const session = await this.connection.startSession();
     try {
-      const { exam_id, started_at, answers } = createSpeakingAttemptDto;
+      const { exam_id } = createSpeakingAttemptDto;
       const user_id = user._id;
-      if (!exam_id || !started_at || !answers || answers.length === 0 || !user_id || user.role !== UserRole.STUDENT) {
+      if (!exam_id || !user_id) {
         throw new BadRequestException('Thiếu thông tin bắt buộc hoặc người dùng không có quyền thực hiện hành động này');
       }
 
-      session.startTransaction();
-      const createdSpeakingAttempt = await this.speakingAttemptModel.create([{
-        exam_id,
-        user_id,
-        started_at,
-        status: ExamAttemptStatus.COMPLETED,
-        submitted_at: dayjs().toISOString(),
-      }], { session });
+      if (user.role !== UserRole.STUDENT) {
+        throw new BadRequestException('Chỉ học sinh mới có thể làm bài luyện');
+      }
 
-      const speakingAttemptId = createdSpeakingAttempt[0]._id;
-      const createSpeakingAnswerDtos = answers.map(answer => ({
-        ...answer,
-        attempt_id: speakingAttemptId,
-      }));
+      const existingAttempt = await this.speakingAttemptModel.findOne({
+        exam_id: new Types.ObjectId(exam_id),
+        user_id: new Types.ObjectId(user_id),
+        status: { $in: [ExamAttemptStatus.IN_PROGRESS, ExamAttemptStatus.NOT_STARTED] },
+      }).lean();
 
-      const createSpeakingAnswer = await this.speakingAnswerService.bulkCreate(createSpeakingAnswerDtos, session);
+      if (existingAttempt) {
+        const answers = await this.speakingAnswerService.findByAttemptId(existingAttempt._id.toString());
+        return {
+          attempt: existingAttempt,
+          answers: answers || [],
+          is_resumed: true
+        };
+      }
 
-      await session.commitTransaction();
-      return { speakingAttempt: createdSpeakingAttempt[0], speakingAnswers: createSpeakingAnswer };
+      // Nếu không có bài đang dở, tạo mới
+      const newAttempt = await this.speakingAttemptModel.create({
+        user_id: new Types.ObjectId(user_id),
+        exam_id: new Types.ObjectId(exam_id),
+        status: ExamAttemptStatus.IN_PROGRESS,
+        started_at: dayjs()
+      });
+
+      return {
+        attempt: newAttempt.toObject(),
+        answers: [],
+        is_resumed: false
+      };
+
     } catch (error) {
       console.error('Error creating speaking attempt:', error);
-      if (session.inTransaction()) {
-        await session.abortTransaction();
-      }
       throw error;
-    } finally {
-      await session.endSession();
     }
   }
+
+  async submitAttempt(attemptId: string, userId: string) {
+    const attempt = await this.speakingAttemptModel.findOneAndUpdate({
+      _id: attemptId,
+      user_id: userId
+    }, {
+      status: ExamAttemptStatus.COMPLETED,
+      completed_at: dayjs()
+    }, { new: true }
+    );
+
+    return attempt;
+  }
+
 
   findAll() {
     return `This action returns all speakingAttempt`;

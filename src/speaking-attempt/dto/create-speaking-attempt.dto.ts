@@ -6,12 +6,12 @@ export class CreateSpeakingAttemptDto {
     @IsMongoId()
     exam_id: string;
 
-    @IsNotEmpty()
-    started_at: Date;
+    // @IsNotEmpty()
+    // started_at: Date;
 
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => CreateSpeakingAnswerDto)
-    answers: CreateSpeakingAnswerDto[];
+    // @IsArray()
+    // @ValidateNested({ each: true })
+    // @Type(() => CreateSpeakingAnswerDto)
+    // answers: CreateSpeakingAnswerDto[];
 
 }

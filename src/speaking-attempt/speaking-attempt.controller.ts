@@ -15,6 +15,11 @@ export class SpeakingAttemptController {
     return this.speakingAttemptService.create(createSpeakingAttemptDto, req.user);
   }
 
+  @Patch(':id/submit')
+  submit(@Param('id') id: string, @Req() req: any) {
+    return this.speakingAttemptService.submitAttempt(id, req.user._id);
+  }
+
   @Get()
   findAll() {
     return this.speakingAttemptService.findAll();

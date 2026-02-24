@@ -37,6 +37,7 @@
     "dayjs": "^1.11.19",
     "express": "^5.2.1",
     "google-auth-library": "^10.5.0",
+    "groq-sdk": "^0.37.0",
     "joi": "^18.0.2",
     "lodash": "^4.17.23",
     "mongoose": "^9.0.1",
@@ -49,8 +50,8 @@
   "devDependencies": {
     "@eslint/eslintrc": "3.3.3",
     "@eslint/js": "9.39.2",
-    "@nestjs/cli": "11.0.14",
-    "@nestjs/schematics": "11.0.9",
+    "@nestjs/cli": "^11.0.16",
+    "@nestjs/schematics": "^11.0.9",
     "@nestjs/testing": "11.1.9",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "5.0.6",
@@ -70,7 +71,11 @@
     "ts-node": "10.9.2",
     "tsconfig-paths": "4.2.0",
     "typescript": "5.9.3",
-    "typescript-eslint": "8.49.0"
+    "typescript-eslint": "^8.56.1"
+  },
+  "overrides": {
+    "minimatch": "^10.2.1",
+    "ajv": "^8.18.0"
   },
   "jest": {
     "moduleFileExtensions": [
