@@ -67,21 +67,192 @@ export class SpeakingAttemptService {
   }
 
   async submitAttempt(attemptId: string, userId: string) {
-    const attempt = await this.speakingAttemptModel.findOneAndUpdate({
-      _id: attemptId,
-      user_id: userId
-    }, {
-      status: ExamAttemptStatus.COMPLETED,
-      completed_at: dayjs()
-    }, { new: true }
-    );
+    try {
+      const attempt = await this.speakingAttemptModel.findOneAndUpdate({
+        _id: new Types.ObjectId(attemptId),
+        user_id: new Types.ObjectId(userId)
+      }, {
+        status: ExamAttemptStatus.COMPLETED,
+        submitted_at: dayjs()
+      }, { new: true }
+      );
 
-    return attempt;
+      return attempt;
+    } catch (error) {
+      console.error(`Error submitting attempt ${attemptId}:`, error);
+      throw error;
+    }
   }
 
 
   findAll() {
     return `This action returns all speakingAttempt`;
+  }
+
+  /**
+   * Lấy lịch sử làm bài của user cho một exam cụ thể
+   */
+  async findHistoryByExamId(examId: string, userId: string) {
+    try {
+
+      const attempts = await this.speakingAttemptModel.aggregate([
+        {
+          $match: {
+            exam_id: new Types.ObjectId(examId),
+            user_id: new Types.ObjectId(userId),
+            status: ExamAttemptStatus.COMPLETED,
+          }
+        }, {
+          $lookup: {
+            from: "speakingexams",
+            localField: "exam_id",
+            foreignField: "_id",
+            as: "exam_id",
+          },
+        }, {
+          $unwind: "$exam_id"
+        }, {
+          $lookup: {
+            from: "speakinganswers",
+            localField: "_id",
+            foreignField: "attempt_id",
+            as: "answers"
+          }
+        }, {
+          $addFields: {
+            // Sort answers by question_number
+            answers: {
+              $sortArray: {
+                input: "$answers",
+                sortBy: { "question.question_number": 1 }
+              }
+            },
+            // Calculate average score
+            average_score: {
+              $cond: [
+                { $gt: [{ $size: "$answers" }, 0] },
+                { $round: [{ $avg: "$answers.score" }, 0] },
+                0
+              ]
+            },
+            // Count answered questions
+            answered_count: {
+              $size: {
+                $filter: {
+                  input: "$answers",
+                  cond: { $ne: ["$$this.audio_url", null] }
+                }
+              }
+            },
+            total_questions: { $size: "$answers" }
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            exam_id: "$exam_id._id",
+            exam: "$exam_id",
+            user_id: 1,
+            status: 1,
+            started_at: 1,
+            submitted_at: 1,
+            average_score: 1,
+            answered_count: 1,
+            total_questions: 1,
+          }
+        }, {
+          $sort: { createdAt: -1 }
+        }
+      ])
+      if (!attempts || attempts.length === 0) {
+        return [];
+      }
+
+      return attempts;
+    } catch (error) {
+      console.error('Error finding history by exam ID:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Lấy chi tiết một lần làm bài với answers
+   */
+  async findDetailById(attemptId: string, userId: string) {
+    try {
+      // const attempt = await this.speakingAttemptModel.findOne({
+      //   _id: new Types.ObjectId(attemptId),
+      //   user_id: new Types.ObjectId(userId),
+      // })
+      //   .populate('exam_id')
+      //   .lean();
+
+      // if (!attempt) {
+      //   throw new BadRequestException('Không tìm thấy bài làm');
+      // }
+
+      // const answers = await this.speakingAnswerService.findByAttemptId(attemptId);
+
+      // // Tính điểm trung bình
+      // const totalScore = answers.reduce((sum, ans) => sum + (ans.score || 0), 0);
+      // const avgScore = answers.length > 0 ? Math.round(totalScore / answers.length) : 0;
+
+      // return {
+      //   attempt: {
+      //     ...attempt,
+      //     exam: attempt.exam_id,
+      //   },
+      //   answers,
+      //   average_score: avgScore,
+      // };
+
+      const attempt = await this.speakingAttemptModel.aggregate([
+        {
+          $match: {
+            _id: new Types.ObjectId(attemptId),
+            user_id: new Types.ObjectId(userId),
+            status: ExamAttemptStatus.COMPLETED,
+          }
+        },
+        {
+          $lookup: {
+            from: "speakingexams",
+            localField: "exam_id",
+            foreignField: "_id",
+            as: "exam",
+          },
+        }, {
+          $unwind: "$exam"
+        }, {
+          $lookup: {
+            from: "speakinganswers",
+            localField: "_id",
+            foreignField: "attempt_id",
+            as: "answers"
+          }
+        }, {
+          $addFields: {
+            average_score: {
+              $cond: [   // $cound điều kiện luôn có if -> then -> else
+                { $gt: [{ $size: "$answers" }, 0] },  // gt: so sánh lớn hơn, size: đếm số phần tử trong mảng answers 
+                { $round: [{ $avg: "$answers.score" }, 0] },
+                0
+              ]
+            }
+          }
+        }
+      ])
+      if (!attempt || attempt.length === 0) {
+        throw new BadRequestException('Không tìm thấy bài làm');
+      }
+      return {
+        attempt: attempt[0],
+        average_score: attempt[0].average_score || 0,
+      }
+    } catch (error) {
+      console.error('Error finding detail by ID:', error);
+      throw error;
+    }
   }
 
   findOne(id: number) {

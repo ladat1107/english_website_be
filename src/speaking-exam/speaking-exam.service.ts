@@ -44,7 +44,7 @@ export class SpeakingExamService {
       filter.is_published = is_published;
     }
 
-    if (user.role !== UserRole.ADMIN) {
+    if (user && user.role !== UserRole.ADMIN) {
       filter.is_published = true;
     }
 

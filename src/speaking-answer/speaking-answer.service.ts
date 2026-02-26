@@ -22,7 +22,7 @@ export class SpeakingAnswerService {
 
     // Tạo hoặc cập nhật bản ghi câu trả lời
     const newAnswer = await this.speakingAnswerModel.findOneAndUpdate({
-      attempt_id,
+      attempt_id: new Types.ObjectId(attempt_id),
       "question.question_number": question.question_number
     }, {
       $set: {
@@ -39,6 +39,21 @@ export class SpeakingAnswerService {
       });
 
     return newAnswer;
+  }
+
+  async updateAIAnalysis(id: string) {
+    try {
+      const answer = await this.speakingAnswerModel.findById(id);
+      if (!answer) {
+        throw new Error('Không tìm thấy câu trả lời');
+      }
+      await this.processAudioAnalysis(id, answer.audio_url, answer.question.question_text);
+      
+      return { message: 'AI analysis updated successfully' };
+    } catch (error) {
+      console.error('Error in updateAIAnalysis:', error);
+      throw error;
+    }
   }
 
   /**
@@ -94,7 +109,7 @@ export class SpeakingAnswerService {
   }
 
   async findByAttemptId(attemptId: string) {
-    return this.speakingAnswerModel.find({ attempt_id: attemptId }).lean();
+    return this.speakingAnswerModel.find({ attempt_id: new Types.ObjectId(attemptId) }).lean();
   }
 
   findAll() {

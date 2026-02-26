@@ -3,6 +3,7 @@ import { SpeakingExamService } from './speaking-exam.service';
 import { CreateSpeakingExamDto } from './dto/create-speaking-exam.dto';
 import { UpdateSpeakingExamDto } from './dto/update-speaking-exam.dto';
 import { QuerySpeakingExamDto } from './dto/query-speaking-exam';
+import { Public } from '@/common/decorators/public.decorator';
 
 @Controller('speaking-exam')
 export class SpeakingExamController {
@@ -14,6 +15,7 @@ export class SpeakingExamController {
   }
 
   @Get()
+  @Public()
   findAll(@Req() req: any, @Query() query: QuerySpeakingExamDto) {
     return this.speakingExamService.findAll(query, req.user);
   }

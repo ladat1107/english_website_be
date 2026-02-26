@@ -7,6 +7,11 @@ import { UpdateSpeakingAnswerDto } from './dto/update-speaking-answer.dto';
 export class SpeakingAnswerController {
   constructor(private readonly speakingAnswerService: SpeakingAnswerService) {}
 
+  @Patch(':id/ai-analysis')
+  async updateAIAnalysis(@Param('id') id: string) {
+    return this.speakingAnswerService.updateAIAnalysis(id);
+  }
+
   @Post()
   create(@Body() createSpeakingAnswerDto: CreateSpeakingAnswerDto) {
     return this.speakingAnswerService.create(createSpeakingAnswerDto);

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Query } from '@nestjs/common';
 import { SpeakingAttemptService } from './speaking-attempt.service';
 import { CreateSpeakingAttemptDto } from './dto/create-speaking-attempt.dto';
 import { UpdateSpeakingAttemptDto } from './dto/update-speaking-attempt.dto';
@@ -18,6 +18,16 @@ export class SpeakingAttemptController {
   @Patch(':id/submit')
   submit(@Param('id') id: string, @Req() req: any) {
     return this.speakingAttemptService.submitAttempt(id, req.user._id);
+  }
+
+  @Get('history/:examId')
+  findHistoryByExamId(@Param('examId') examId: string, @Req() req: any) {
+    return this.speakingAttemptService.findHistoryByExamId(examId, req.user._id);
+  }
+
+  @Get('detail/:attemptId')
+  findDetailById(@Param('attemptId') attemptId: string, @Req() req: any) {
+    return this.speakingAttemptService.findDetailById(attemptId, req.user._id);
   }
 
   @Get()
