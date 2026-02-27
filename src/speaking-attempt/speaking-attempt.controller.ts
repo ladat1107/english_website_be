@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Query } from '@
 import { SpeakingAttemptService } from './speaking-attempt.service';
 import { CreateSpeakingAttemptDto } from './dto/create-speaking-attempt.dto';
 import { UpdateSpeakingAttemptDto } from './dto/update-speaking-attempt.dto';
+import { QueryGradingListDto } from './dto/query-grading-list.dto';
 
 @Controller('speaking-attempt')
 export class SpeakingAttemptController {
@@ -20,6 +21,10 @@ export class SpeakingAttemptController {
     return this.speakingAttemptService.submitAttempt(id, req.user._id);
   }
 
+  // =====================================================
+  // USER ROUTES
+  // =====================================================
+
   @Get('history/:examId')
   findHistoryByExamId(@Param('examId') examId: string, @Req() req: any) {
     return this.speakingAttemptService.findHistoryByExamId(examId, req.user._id);
@@ -31,22 +36,22 @@ export class SpeakingAttemptController {
   }
 
   @Get()
-  findAll() {
-    return this.speakingAttemptService.findAll();
+  findAll(@Query() query: QueryGradingListDto) {
+    return this.speakingAttemptService.findAll(query);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.speakingAttemptService.findOne(+id);
+    return this.speakingAttemptService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateSpeakingAttemptDto: UpdateSpeakingAttemptDto) {
-    return this.speakingAttemptService.update(+id, updateSpeakingAttemptDto);
+    return this.speakingAttemptService.update(id, updateSpeakingAttemptDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.speakingAttemptService.remove(+id);
+    return this.speakingAttemptService.remove(id);
   }
 }

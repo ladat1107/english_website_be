@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CreateSpeakingAnswerDto } from './dto/create-speaking-answer.dto';
 import { UpdateSpeakingAnswerDto } from './dto/update-speaking-answer.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -6,15 +6,20 @@ import { SpeakingAnswer } from './schemas/speaking-answer.schemas';
 import { Model, Types } from 'mongoose';
 import { SpeechToTextService } from '@/groq/speech-to-text.service';
 import { AIAnalysisService } from '@/groq/ai-analysis.service';
+import { SpeakingAttemptService } from '@/speaking-attempt/speaking-attempt.service';
 
 @Injectable()
 export class SpeakingAnswerService {
 
   constructor(
     @InjectModel(SpeakingAnswer.name)
+
     private readonly speakingAnswerModel: Model<SpeakingAnswer>,
     private speechToTextService: SpeechToTextService,
-    private aiAnalysisService: AIAnalysisService
+    private aiAnalysisService: AIAnalysisService,
+
+    @Inject(forwardRef(() => SpeakingAttemptService))
+    private speakingAttemptService: SpeakingAttemptService,
   ) { }
 
   async create(createSpeakingAnswerDto: CreateSpeakingAnswerDto) {
@@ -48,7 +53,7 @@ export class SpeakingAnswerService {
         throw new Error('Không tìm thấy câu trả lời');
       }
       await this.processAudioAnalysis(id, answer.audio_url, answer.question.question_text);
-      
+
       return { message: 'AI analysis updated successfully' };
     } catch (error) {
       console.error('Error in updateAIAnalysis:', error);
@@ -116,15 +121,42 @@ export class SpeakingAnswerService {
     return `This action returns all speakingAnswer`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} speakingAnswer`;
+  async findOne(id: string) {
+    const answer = await this.speakingAnswerModel.findById(id);
+    if (!answer) {
+      throw new Error('Không tìm thấy câu trả lời');
+    }
+    return answer;
   }
 
-  update(id: number, updateSpeakingAnswerDto: UpdateSpeakingAnswerDto) {
-    return `This action updates a #${id} speakingAnswer`;
+  async update(id: string, updateSpeakingAnswerDto: UpdateSpeakingAnswerDto) {
+
+    try {
+      const updatedAnswer = await this.speakingAnswerModel.findByIdAndUpdate(id, {
+        $set: {
+          ...updateSpeakingAnswerDto
+        }
+      }, { new: true });
+      if (!updatedAnswer) {
+        throw new Error('Không tìm thấy câu trả lời');
+      }
+
+      if (updateSpeakingAnswerDto.teacher_feedback) {
+        // Nếu có feedback mới, tự động cập nhật has_teacher_feedback của SpeakingAttempt
+        await this.speakingAttemptService.update(updatedAnswer.attempt_id.toString(), { has_teacher_feedback: true });
+      }
+      return updatedAnswer;
+    } catch (error) {
+      console.error('Error updating speaking answer:', error);
+      throw error;
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} speakingAnswer`;
+  async remove(id: string) {
+    const deletedAnswer = await this.speakingAnswerModel.findByIdAndDelete(id);
+    if (!deletedAnswer) {
+      throw new Error('Không tìm thấy câu trả lời để xóa');
+    }
+    return deletedAnswer;
   }
 }

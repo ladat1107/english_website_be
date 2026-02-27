@@ -5,7 +5,7 @@ import { UpdateSpeakingAnswerDto } from './dto/update-speaking-answer.dto';
 
 @Controller('speaking-answer')
 export class SpeakingAnswerController {
-  constructor(private readonly speakingAnswerService: SpeakingAnswerService) {}
+  constructor(private readonly speakingAnswerService: SpeakingAnswerService) { }
 
   @Patch(':id/ai-analysis')
   async updateAIAnalysis(@Param('id') id: string) {
@@ -24,16 +24,16 @@ export class SpeakingAnswerController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.speakingAnswerService.findOne(+id);
+    return this.speakingAnswerService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateSpeakingAnswerDto: UpdateSpeakingAnswerDto) {
-    return this.speakingAnswerService.update(+id, updateSpeakingAnswerDto);
+    return this.speakingAnswerService.update(id, updateSpeakingAnswerDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.speakingAnswerService.remove(+id);
+    return this.speakingAnswerService.remove(id);
   }
 }

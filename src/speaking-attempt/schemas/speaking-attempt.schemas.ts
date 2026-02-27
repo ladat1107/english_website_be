@@ -24,6 +24,8 @@ export class SpeakingAttempt {
     @Prop({ type: Date, default: null })
     submitted_at: Date;
 
+    @Prop({ type: Boolean, default: false })
+    has_teacher_feedback: boolean;
 }
 
 export const SpeakingAttemptSchema = SchemaFactory.createForClass(SpeakingAttempt);

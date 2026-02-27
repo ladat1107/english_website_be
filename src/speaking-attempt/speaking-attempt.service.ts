@@ -1,21 +1,26 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CreateSpeakingAttemptDto } from './dto/create-speaking-attempt.dto';
 import { UpdateSpeakingAttemptDto } from './dto/update-speaking-attempt.dto';
+import { QueryGradingListDto } from './dto/query-grading-list.dto';
 import { JwtPayload } from '@/auth/auth.service';
-import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { Connection, Model, Types } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
 import { SpeakingAnswerService } from '@/speaking-answer/speaking-answer.service';
 import { SpeakingAttempt } from './schemas/speaking-attempt.schemas';
 import { ExamAttemptStatus, UserRole } from '@/utils/constants/enum';
 import dayjs from 'dayjs';
+import { calculateSkip, createPaginatedResponse } from '@/common/dto/pagination.dto';
+import { buildVietnameseRegex } from '@/utils/functions/function';
 
 @Injectable()
 export class SpeakingAttemptService {
 
   constructor(
-    @InjectConnection() private readonly connection: Connection,
     @InjectModel(SpeakingAttempt.name)
+
     private readonly speakingAttemptModel: Model<SpeakingAttempt>,
+
+    @Inject(forwardRef(() => SpeakingAnswerService))
     private speakingAnswerService: SpeakingAnswerService,
   ) { }
 
@@ -85,10 +90,6 @@ export class SpeakingAttemptService {
   }
 
 
-  findAll() {
-    return `This action returns all speakingAttempt`;
-  }
-
   /**
    * Lấy lịch sử làm bài của user cho một exam cụ thể
    */
@@ -144,7 +145,6 @@ export class SpeakingAttemptService {
                 }
               }
             },
-            total_questions: { $size: "$answers" }
           }
         },
         {
@@ -158,7 +158,6 @@ export class SpeakingAttemptService {
             submitted_at: 1,
             average_score: 1,
             answered_count: 1,
-            total_questions: 1,
           }
         }, {
           $sort: { createdAt: -1 }
@@ -180,32 +179,6 @@ export class SpeakingAttemptService {
    */
   async findDetailById(attemptId: string, userId: string) {
     try {
-      // const attempt = await this.speakingAttemptModel.findOne({
-      //   _id: new Types.ObjectId(attemptId),
-      //   user_id: new Types.ObjectId(userId),
-      // })
-      //   .populate('exam_id')
-      //   .lean();
-
-      // if (!attempt) {
-      //   throw new BadRequestException('Không tìm thấy bài làm');
-      // }
-
-      // const answers = await this.speakingAnswerService.findByAttemptId(attemptId);
-
-      // // Tính điểm trung bình
-      // const totalScore = answers.reduce((sum, ans) => sum + (ans.score || 0), 0);
-      // const avgScore = answers.length > 0 ? Math.round(totalScore / answers.length) : 0;
-
-      // return {
-      //   attempt: {
-      //     ...attempt,
-      //     exam: attempt.exam_id,
-      //   },
-      //   answers,
-      //   average_score: avgScore,
-      // };
-
       const attempt = await this.speakingAttemptModel.aggregate([
         {
           $match: {
@@ -255,15 +228,191 @@ export class SpeakingAttemptService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} speakingAttempt`;
+  async findAll(query: QueryGradingListDto) {
+    const { page = 1, limit = 10, search, topic, has_teacher_feedback } = query;
+
+    const matchStage: any = {
+      status: ExamAttemptStatus.COMPLETED,
+    };
+
+    if (has_teacher_feedback !== undefined) {
+      matchStage.has_teacher_feedback = has_teacher_feedback;
+    }
+
+    const searchStage = search ? {
+      $or: [
+        { 'user.full_name': { $regex: buildVietnameseRegex(search), $options: 'i' } },
+        { 'user.email': { $regex: buildVietnameseRegex(search), $options: 'i' } },
+        { 'exam.title': { $regex: buildVietnameseRegex(search), $options: 'i' } },
+      ]
+    } : {};
+
+    const piline: any = [{
+      $match: matchStage,
+    }, {
+      $lookup: {
+        from: 'users',
+        localField: 'user_id',
+        foreignField: '_id',
+        as: 'user',
+      }
+    }, {
+      $unwind: '$user'
+    }, {
+      $lookup: {
+        from: 'speakingexams',
+        localField: 'exam_id',
+        foreignField: '_id',
+        as: 'exam',
+      }
+    }, {
+      $unwind: '$exam'
+    },
+    ...search ? [{ $match: searchStage }] : [],
+    ...topic ? [{ $match: { 'exam.topic': topic } }] : [],
+    {
+      $sort: { submitted_at: -1 },
+    }, {
+      $facet: {
+        metadata: [{ $count: "total" }],
+        data: [
+          { $skip: calculateSkip(page, limit) },
+          { $limit: limit },
+          {
+            $lookup: {
+              from: 'speakinganswers',
+              localField: '_id',
+              foreignField: 'attempt_id',
+              as: 'answers',
+            }
+          },
+          {
+            $addFields: {
+              average_score: {
+                $cond: [
+                  { $gt: [{ $size: '$answers' }, 0] },
+                  { $round: [{ $avg: '$answers.score' }, 0] },
+                  0
+                ],
+              },
+            }
+          }
+        ]
+      }
+    }, {
+      $project: {
+        items: "$data",
+        totalItems: { $ifNull: [{ $arrayElemAt: ["$metadata.total", 0] }, 0] }, // arrayElemAt để lấy phần tử đầu tiên của mảng metadata
+      }
+    }
+    ];
+
+    const result = await this.speakingAttemptModel.aggregate(piline);
+
+    return createPaginatedResponse(result[0].items, result[0].totalItems, page, limit);
   }
 
-  update(id: number, updateSpeakingAttemptDto: UpdateSpeakingAttemptDto) {
+  async findOne(attemptId: string) {
+    try {
+      const attempt = await this.speakingAttemptModel.aggregate([
+        {
+          $match: {
+            _id: new Types.ObjectId(attemptId),
+            status: ExamAttemptStatus.COMPLETED,
+          }
+        },
+        // Lookup user
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'user_id',
+            foreignField: '_id',
+            as: 'user',
+            pipeline: [
+              {
+                $project: {
+                  _id: 1,
+                  email: 1,
+                  full_name: 1,
+                  avatar_url: 1,
+                }
+              }
+            ]
+          }
+        },
+        { $unwind: '$user' },
+        // Lookup exam
+        {
+          $lookup: {
+            from: 'speakingexams',
+            localField: 'exam_id',
+            foreignField: '_id',
+            as: 'exam',
+          }
+        },
+        { $unwind: '$exam' },
+        // Lookup answers
+        {
+          $lookup: {
+            from: 'speakinganswers',
+            localField: '_id',
+            foreignField: 'attempt_id',
+            as: 'answers',
+          }
+        },
+        {
+          $addFields: {
+            answers: {
+              $sortArray: {
+                input: '$answers',
+                sortBy: { 'question.question_number': 1 }
+              }
+            },
+            average_score: {
+              $cond: [
+                { $gt: [{ $size: '$answers' }, 0] },
+                { $round: [{ $avg: '$answers.score' }, 0] },
+                0
+              ]
+            }
+          }
+        }
+      ]);
+
+      if (!attempt || attempt.length === 0) {
+        throw new BadRequestException('Không tìm thấy bài làm');
+      }
+
+      const attemptData = attempt[0];
+      return attemptData;
+    } catch (error) {
+      console.error('Error finding detail for grading:', error);
+      throw error;
+    }
+  }
+
+  async update(id: string, updateSpeakingAttemptDto: UpdateSpeakingAttemptDto) {
+    try {
+      console.log(`Updating speaking attempt ${id} with data:`, updateSpeakingAttemptDto);
+      const updatedAttempt = await this.speakingAttemptModel.findByIdAndUpdate(id, {
+        $set: {
+          ...updateSpeakingAttemptDto
+        }
+      }, { new: true });
+
+      if (!updatedAttempt) {
+        throw new BadRequestException('Không tìm thấy bài làm');
+      }
+
+      return updatedAttempt;
+    } catch (error) {
+      console.error(`Error updating speaking attempt ${id}:`, error);
+      throw error;
+    }
     return `This action updates a #${id} speakingAttempt`;
   }
 
-  remove(id: number) {
+  async remove(id: string) {
     return `This action removes a #${id} speakingAttempt`;
   }
 }
