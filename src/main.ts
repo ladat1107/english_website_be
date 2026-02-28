@@ -26,7 +26,7 @@ async function bootstrap() {
     ],
   });
 
-  const port = configService.get('app.port');
+  const port = configService.get('app.port') || 8080;
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true, // Truyền thừa thuộc tính tự động bị loại bỏ
@@ -38,6 +38,6 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(new ResponseInterceptor());
 
-  await app.listen(port ?? 8080);
+  await app.listen(port, '0.0.0.0');
 }
 bootstrap();
