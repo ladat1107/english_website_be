@@ -19,16 +19,16 @@ import type { Response } from 'express';
 
 const getAccessTokenCookieOptions = (isProduction: boolean) => ({
   httpOnly: true,
-  secure: isProduction,
-  sameSite: 'lax' as const,
+  secure: true,
+  sameSite: 'none' as const,
   maxAge: Number(process.env.EXP_IN_ACCESS_COOKIE), // 1 giờ (khớp với EXP_IN_ACCESS_TOKEN)
   path: '/',
 });
 
 const getRefreshTokenCookieOptions = (isProduction: boolean) => ({
   httpOnly: true,
-  secure: isProduction,
-  sameSite: 'lax' as const,
+  secure: true,
+  sameSite: 'none' as const,
   maxAge: Number(process.env.EXP_IN_REFRESH_COOKIE), // 7 ngày
   path: '/',
 });
