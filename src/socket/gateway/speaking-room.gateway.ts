@@ -39,7 +39,7 @@ interface AuthenticatedSocket extends Socket {
 @WebSocketGateway({
     namespace: '/speaking',
     cors: {
-        origin: "http://localhost:3000",
+        origin: process.env.FRONTEND_URL || 'https://khailingo.vercel.app',
         credentials: true,
     },
 })
