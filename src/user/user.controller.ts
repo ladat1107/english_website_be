@@ -31,4 +31,23 @@ export class UsersController {
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
   }
+
+  //////////////////////////
+  @Get('me/achievements')
+  getMyAchievent() {
+    return null;
+  }
+
+  @Get('me/stats')
+  getMyStatus() {
+    return null;
+  }
+  @Get('/exam-attempts/me/recent')
+  ah() {
+    return null;
+  }
+  @Get('speaking-attempts/me/recent')
+  hg() {
+    return null;
+  }
 }

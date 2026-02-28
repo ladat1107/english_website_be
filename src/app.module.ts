@@ -17,6 +17,7 @@ import { FlashCardDeckModule } from './flash-card-deck/flash-card-deck.module';
 import { FlashcardModule } from './flashcard/flashcard.module';
 import { UserFlashcardModule } from './user-flashcard/user-flashcard.module';
 import { AuthModule } from './auth/auth.module';
+import { SocketModule } from './socket/socket.module';
 import { configValidationSchema } from './config/config.schema';
 import appConfig from '@/config/app.config';
 import authConfig from '@/config/auth.config';
@@ -52,7 +53,8 @@ import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
     FlashCardDeckModule,
     FlashcardModule,
     UserFlashcardModule,
-    AuthModule
+    AuthModule,
+    SocketModule
   ],
   controllers: [AppController],
   providers: [AppService,
