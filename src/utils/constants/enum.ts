@@ -17,7 +17,7 @@ export enum ProficiencyLevel {
     BEGINNER = 'Beginner',
     ELEMENTARY = 'Elementary',
     INTERMEDIATE = 'Intermediate',
-    UPPER_INTERMEDIATE = 'Upper-Intermediate',
+    UPPER_INTERMEDIATE = 'Upper Intermediate',
     ADVANCED = 'Advanced'
 }
 

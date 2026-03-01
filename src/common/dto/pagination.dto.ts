@@ -38,6 +38,11 @@ export class PaginatedResponseDto<T> {
         type: PaginationMetaDto,
     })
     pagination: PaginationMetaDto;
+    @ApiProperty({
+        description: 'Thống kê kèm theo (nếu có)',
+        required: false,
+    })
+    statistics?: any; // Có thể thêm trường này nếu muốn trả về thống kê kèm theo
 }
 
 export function createPaginatedResponse<T>(
@@ -45,6 +50,7 @@ export function createPaginatedResponse<T>(
     totalItems: number,
     page: number,
     limit: number,
+    statistics?: any, // Có thể thêm trường này nếu muốn trả về thống kê kèm theo
 ): PaginatedResponseDto<T> {
     const totalPages = Math.ceil(totalItems / limit);
     const hasNextPage = page < totalPages;
@@ -62,6 +68,7 @@ export function createPaginatedResponse<T>(
     return {
         items,
         pagination: pagination,
+        statistics, // Trả về thống kê nếu có
     };
 }
 
