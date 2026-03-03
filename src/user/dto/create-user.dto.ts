@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsEmail, IsNotEmpty, IsOptional, IsString, Matches } from "class-validator";
 
 export class CreateUserDto {
 
@@ -35,4 +35,10 @@ export class CreateUserDto {
 
     @IsOptional()
     learning_goals?: string[];
+
+    @IsOptional()
+    @Matches(/^\d{10}$/, {
+        message: 'Điện thoại phải là 10 chữ số',
+    })
+    phone?: string;
 }

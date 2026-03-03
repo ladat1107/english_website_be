@@ -64,3 +64,9 @@ export enum SpeakingTopic {
     HOBBIES_AND_INTERESTS = 'Hobbies and Interests',
 
 }
+
+export enum RegistrationStatus {
+    REGISTERED = 'REGISTERED',
+    ATTENDED = 'ATTENDED',
+    ABSENT = 'ABSENT',
+}

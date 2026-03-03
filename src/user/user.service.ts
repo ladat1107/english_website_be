@@ -7,6 +7,8 @@ import { Model } from 'mongoose';
 import { QueryUserDto } from './dto/query-user.dto';
 import { calculateSkip, createPaginatedResponse } from '@/common/dto/pagination.dto';
 import { buildVietnameseRegex } from '@/utils/functions/function';
+import { JwtPayload } from '@/auth/auth.service';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -154,7 +156,6 @@ export class UsersService {
     }
   }
 
-
   async update(id: string, updateUserDto: UpdateUserDto) {
     try {
       const updatedUser = await this.userModel.findByIdAndUpdate(id, {
@@ -180,6 +181,31 @@ export class UsersService {
         throw new NotFoundException('Không tìm thấy người dùng');
       }
       return deletedUser;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async getUserByIds(userIds: string[]) {
+    try {
+      const users = await this.userModel.find({ _id: { $in: userIds } }).exec();
+      return users;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async updateProfile(updateProfileDto: UpdateProfileDto, user: JwtPayload) {
+    try {
+      const updatedUser = await this.userModel.findByIdAndUpdate(user._id, {
+        $set: { ...updateProfileDto },
+      }, { new: true }).exec();
+      if (!updatedUser) {
+        throw new NotFoundException('Không tìm thấy người dùng');
+      }
+      return updatedUser;
     } catch (error) {
       console.error(error);
       throw error;

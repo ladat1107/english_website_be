@@ -25,6 +25,8 @@ import groqConfig from '@/config/groq.config';
 import dbConfig from '@/config/db.config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
+import { ClassSessionsModule } from './class-sessions/class-sessions.module';
+import { ParticipantsModule } from './participants/participants.module';
 
 @Module({
   imports: [
@@ -54,7 +56,9 @@ import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
     FlashcardModule,
     UserFlashcardModule,
     AuthModule,
-    SocketModule
+    SocketModule,
+    ClassSessionsModule,
+    ParticipantsModule
   ],
   controllers: [AppController],
   providers: [AppService,

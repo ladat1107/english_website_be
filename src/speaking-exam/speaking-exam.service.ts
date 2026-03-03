@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException, NotFoundException } from '@ne
 import { CreateSpeakingExamDto } from './dto/create-speaking-exam.dto';
 import { UpdateSpeakingExamDto } from './dto/update-speaking-exam.dto';
 import { JwtPayload } from '@/auth/auth.service';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { SpeakingExam, SpeakingExamDocument } from './schemas/speaking-exam.schemas';
 import { InjectModel } from '@nestjs/mongoose';
 import { QuerySpeakingExamDto } from './dto/query-speaking-exam';
@@ -23,7 +23,7 @@ export class SpeakingExamService {
       const createdSpeakingExam = new this.speakingExamModel({
         ...createSpeakingExamDto,
         is_published: false,
-        created_by: user._id,
+        created_by: new Types.ObjectId(user._id),
       });
       return await createdSpeakingExam.save();
     } catch (error) {

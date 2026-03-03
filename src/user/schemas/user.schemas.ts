@@ -22,6 +22,9 @@ export class User {
     full_name: string;
 
     @Prop({ default: null })
+    phone: string;
+
+    @Prop({ default: null })
     avatar_url: string;
 
     @Prop()

@@ -67,7 +67,6 @@ export class SpeakingRoomGateway
         try {
             // Lấy token từ handshake
             const token = this.extractTokenFromHandshake(client);
-            console.log(`Client ${client.id} connecting with token:`, token);
 
             if (!token) {
                 this.logger.warn(`Client ${client.id} connected without token`);
