@@ -8,6 +8,7 @@ import { Participant } from './schemas/participant.schemas';
 import { Model, Types } from 'mongoose';
 import { ClassSessionsService } from '@/class-sessions/class-sessions.service';
 import dayjs from 'dayjs';
+import { MailService } from '@/mail/mail.service';
 
 @Injectable()
 export class ParticipantsService {
@@ -15,7 +16,8 @@ export class ParticipantsService {
   constructor(
     @InjectModel(Participant.name)
     private readonly participantModel: Model<Participant>,
-    private classSessionsService: ClassSessionsService
+    private classSessionsService: ClassSessionsService,
+    private mailService: MailService
   ) { }
 
   async create(createParticipantDto: CreateParticipantDto, user: JwtPayload) {
@@ -39,16 +41,31 @@ export class ParticipantsService {
         class_session_id: new Types.ObjectId(class_session_id),
         user_id: new Types.ObjectId(user._id)
       });
+
       if (paticipantExist) {
         throw new Error('Bạn đã đăng ký tham gia lớp học này rồi');
       }
 
 
-      return await this.participantModel.create({
+
+      const createdParticipant = await this.participantModel.create({
         class_session_id: new Types.ObjectId(class_session_id),
         user_id: new Types.ObjectId(user._id),
         status: RegistrationStatus.REGISTERED,
       });
+
+      if (createdParticipant) {
+        this.mailService.sendClassScheduleMail(user.email, {
+          userName: user.full_name,
+          title: classSession.title,
+          description: classSession.description,
+          date: dayjs(classSession.date).format('DD/MM/YYYY'),
+          startTime: classSession.startTime,
+          endTime: classSession.endTime,
+          link: classSession.link,
+        });
+      }
+      return createdParticipant;
     } catch (error) {
       console.error(error);
       throw error;

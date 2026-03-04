@@ -164,7 +164,9 @@ export class ClassSessionsService {
 
   async findById(id: string) {
     try {
-      const classSession = await this.classSessionModel.findById(new Types.ObjectId(id));
+      const classSession = await this.classSessionModel.findById(new Types.ObjectId(id))
+        .populate('mentor_id', '-refreshTokenHash')
+        .lean();
 
       if (!classSession) {
         throw new Error('Không tìm thấy buổi học');
