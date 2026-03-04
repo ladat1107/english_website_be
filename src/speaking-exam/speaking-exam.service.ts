@@ -33,7 +33,7 @@ export class SpeakingExamService {
   }
 
   async findAll(query: QuerySpeakingExamDto, user: JwtPayload) {
-    const { page = 1, limit = 10, search, topic, is_published } = query;
+    const { page = 1, limit = 10, search, topic, is_published, level, type } = query;
 
     const filter: any = {};
 
@@ -42,6 +42,12 @@ export class SpeakingExamService {
     }
     if (is_published !== undefined) {
       filter.is_published = is_published;
+    }
+    if (level) {
+      filter.level = level;
+    }
+    if (type) {
+      filter.type = type;
     }
 
     if (user && user.role !== UserRole.ADMIN) {

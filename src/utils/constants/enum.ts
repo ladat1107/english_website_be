@@ -52,21 +52,32 @@ export enum ExamAttemptStatus {
 }
 
 export enum SpeakingTopic {
+    ACADEMIC_TOPICS = 'Academic Topics',
+    CULTURE = 'Culture',
     DAILY_LIFE = 'Daily Life',
     EDUCATION = 'Education',
-    TECHNOLOGY = 'Technology',
     ENVIRONMENT = 'Environment',
     HEALTH = 'Health',
-    CULTURE = 'Culture',
+    HOBBIES_AND_INTERESTS = 'Hobbies and Interests',
+    SOCIAL_ISSUES = 'Social Issues',
+    TECHNOLOGY = 'Technology',
     TRAVEL = 'Travel',
     WORK_AND_CAREER = 'Work and Career',
-    SOCIAL_ISSUES = 'Social Issues',
-    HOBBIES_AND_INTERESTS = 'Hobbies and Interests',
-
 }
 
 export enum RegistrationStatus {
     REGISTERED = 'REGISTERED',
     ATTENDED = 'ATTENDED',
     ABSENT = 'ABSENT',
+}
+
+export enum LevelExam {
+    EASY = 'Easy',
+    MEDIUM = 'Medium',
+    HARD = 'Hard',
+}
+
+export enum TypeLanguage {
+    ENGLISH = 'English',
+    CHINESE = 'Chinese',
 }
