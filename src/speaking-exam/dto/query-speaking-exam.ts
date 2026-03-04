@@ -1,6 +1,6 @@
-import { IsEnum, IsOptional, IsString, IsBoolean } from "class-validator";
+import { IsEnum, IsOptional, IsString, IsBoolean, IsNotEmpty } from "class-validator";
 import { Transform } from "class-transformer";
-import { SpeakingTopic } from "@/utils/constants/enum";
+import { LevelExam, SpeakingTopic, TypeLanguage } from "@/utils/constants/enum";
 import { PaginationDto } from "@/common/dto/filter-query.dto";
 
 /**
@@ -15,4 +15,12 @@ export class QuerySpeakingExamDto extends PaginationDto {
     @Transform(({ value }) => value === 'true' || value === true)
     @IsBoolean()
     is_published?: boolean;
+
+    @IsOptional()
+    @IsEnum(LevelExam, { message: "Cấp độ không hợp lệ" })
+    level?: LevelExam;
+
+    @IsOptional({ message: "Ngôn ngữ không được để trống" })
+    @IsEnum(TypeLanguage, { message: "Ngôn ngữ không hợp lệ" })
+    type?: TypeLanguage;
 }

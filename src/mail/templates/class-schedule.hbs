@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lịch học Khailingo</title>
+</head>
+
+<body style="margin:0; padding:0; background:#f5f5f5; font-family:Arial, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5; padding:20px 0;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0"
+                    style="background:#ffffff; border-radius:8px; overflow:hidden;">
+
+                    <tr>
+                        <td align="center" style="background:#D82222; padding:20px;">
+                            <img src="{{frontendUrl}}/logo/logo.png" alt="Khailingo" width="140" />
+                            <h2 style="color:#ffffff; margin:10px 0 0; font-weight:600;">
+                                Thông báo lịch học mới
+                            </h2>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 30px;">
+                            <p style="font-size:16px; color:#333;">
+                                Xin chào <strong>{{userName}}</strong>,
+                            </p>
+
+                            <p style="font-size:15px; color:#555; line-height:1.6;">
+                                Bạn vừa đăng ký lịch học tại <strong>Khailingo</strong>.
+                                Dưới đây là thông tin buổi học:
+                            </p>
+
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:20px;">
+                                <tr>
+                                    <td style="padding:8px 0; font-size:15px;">
+                                        <strong>Tiêu đề:</strong> {{title}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px 0; font-size:15px;">
+                                        <strong>Mô tả:</strong> {{description}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px 0; font-size:15px;">
+                                        <strong>Ngày học:</strong> {{date}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px 0; font-size:15px;">
+                                        <strong>Giờ học:</strong> {{startTime}} → {{endTime}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px 0; font-size:15px;">
+                                        <strong>Link học:</strong>
+                                        <a href="{{link}}" style="color:#D82222;">
+                                            {{link}}
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <div style="text-align:center; margin-top:25px;">
+                                <a href="{{link}}"
+                                    style="background:#D82222; color:#fff; text-decoration:none; padding:12px 24px; border-radius:6px; font-size:16px; display:inline-block;">
+                                    Tham gia buổi học
+                                </a>
+                            </div>
+
+                            <div
+                                style="margin-top:30px; padding:15px; background:#fdf2f2; border-radius:6px; text-align:center;">
+                                <p style="margin:0 0 10px; font-size:14px; color:#444;">
+                                    📢 Để nhận thông báo nhanh nhất về lịch học và thay đổi lớp,
+                                    vui lòng tham gia nhóm Zalo của Khailingo:
+                                </p>
+
+                                <a href="{{zaloGroupUrl}}" style="display:inline-block; background:#0068ff; color:#fff;
+            padding:10px 20px; border-radius:5px;
+            text-decoration:none; font-size:14px;">
+                                    👉 Tham gia nhóm Zalo
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="center" style="background:#fafafa; padding:20px; color:#777; font-size:13px;">
+                            © 2026 Khailingo.
+                            <br />
+                            Đây là email tự động, vui lòng không phản hồi.
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

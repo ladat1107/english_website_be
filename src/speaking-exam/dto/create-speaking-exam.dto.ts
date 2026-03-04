@@ -1,9 +1,18 @@
 import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, MaxLength, Min, ValidateNested } from "class-validator";
 import { CreateSpeakingQuestionDto } from "./speaking-question";
 import { Type } from "class-transformer";
-import { SpeakingTopic } from "@/utils/constants/enum";
+import { LevelExam, SpeakingTopic, TypeLanguage } from "@/utils/constants/enum";
 import { CreateVideoScriptDto } from "./video-script";
 
+export class CreateVocabularyDto {
+    @IsNotEmpty({ message: "Từ vựng không được để trống" })
+    @IsString()
+    vocabulary: string;
+
+    @IsNotEmpty({ message: "Nghĩa không được để trống" })
+    @IsString()
+    meaning: string;
+}
 export class CreateSpeakingExamDto {
 
     @IsNotEmpty({ message: "Tiêu đề không được để trống" })
@@ -26,6 +35,14 @@ export class CreateSpeakingExamDto {
     @IsEnum(SpeakingTopic, { message: "Chủ đề không hợp lệ" })
     topic: SpeakingTopic;
 
+    @IsNotEmpty({ message: "Cấp độ không được để trống" })
+    @IsEnum(LevelExam, { message: "Cấp độ không hợp lệ" })
+    level: LevelExam;
+
+    @IsNotEmpty({ message: "Ngôn ngữ không được để trống" })
+    @IsEnum(TypeLanguage, { message: "Ngôn ngữ không hợp lệ" })
+    type: TypeLanguage
+
     @IsNumber()
     @Min(1, { message: "Thời lượng ước tính phải lớn hơn 0" })
     estimated_duration_minutes: number;
@@ -41,4 +58,10 @@ export class CreateSpeakingExamDto {
     @ValidateNested({ each: true })
     @Type(() => CreateVideoScriptDto)
     video_scripts?: CreateVideoScriptDto[];
+
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => CreateVocabularyDto)
+    vocabularies?: CreateVocabularyDto[];
 }

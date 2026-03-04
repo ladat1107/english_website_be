@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
-import { SpeakingTopic } from "src/utils/constants/enum";
+import { LevelExam, SpeakingTopic, TypeLanguage } from "src/utils/constants/enum";
 
 
 @Schema({ _id: true })
@@ -16,6 +16,17 @@ class Question {
 }
 
 const QuestionSchema = SchemaFactory.createForClass(Question);
+
+@Schema({ _id: true })
+class Vocabulary {
+    @Prop({ required: true, type: String })
+    vocabulary: string;
+
+    @Prop({ required: true, type: String })
+    meaning: string;
+}
+
+const VocabularySchema = SchemaFactory.createForClass(Vocabulary);
 
 
 @Schema({ _id: false })
@@ -62,11 +73,22 @@ export class SpeakingExam {
     @Prop({ type: [QuestionSchema], default: [] })
     questions: Question[];
 
+    @Prop({ type: [VocabularySchema], default: [] })
+    vocabularies: Vocabulary[];
+
     @Prop({ required: true, type: Boolean, default: false })
     is_published: boolean;
 
+    @Prop({ required: true, type: String, enum: LevelExam })
+    level: LevelExam;
+
+    @Prop({ required: true, type: String, enum: TypeLanguage })
+    type: TypeLanguage
+
     @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
     created_by: Types.ObjectId;
+
+
 }
 
 export const SpeakingExamSchema = SchemaFactory.createForClass(SpeakingExam);

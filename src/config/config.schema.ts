@@ -21,7 +21,11 @@ export const configValidationSchema = Joi.object({
 
     GROQ_API_KEY: Joi.string().required(),
 
-    // MAIL_HOST: Joi.string().required(),
-    // MAIL_USER: Joi.string().required(),
-    // MAIL_PASS: Joi.string().required(),
+    MAIL_HOST: Joi.string().required(),
+    MAIL_PORT: Joi.number().required(),
+    MAIL_USER: Joi.string().required(),
+    MAIL_PASS: Joi.string().required(),
+    MAIL_FROM: Joi.string().required(),
+
+    ZALO_GROUP_URL: Joi.string().required(),
 });

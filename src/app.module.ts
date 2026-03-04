@@ -25,12 +25,16 @@ import groqConfig from '@/config/groq.config';
 import dbConfig from '@/config/db.config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
+import { ClassSessionsModule } from './class-sessions/class-sessions.module';
+import { ParticipantsModule } from './participants/participants.module';
+import mailConfig from './config/mail.config';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, authConfig, dbConfig, groqConfig],
+      load: [appConfig, authConfig, dbConfig, groqConfig, mailConfig],
       validationSchema: configValidationSchema
     }),
     MongooseModule.forRootAsync({
@@ -54,7 +58,10 @@ import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
     FlashcardModule,
     UserFlashcardModule,
     AuthModule,
-    SocketModule
+    SocketModule,
+    ClassSessionsModule,
+    ParticipantsModule,
+    MailModule
   ],
   controllers: [AppController],
   providers: [AppService,
