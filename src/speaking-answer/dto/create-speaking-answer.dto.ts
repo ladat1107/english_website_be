@@ -19,4 +19,5 @@ export class CreateSpeakingAnswerDto {
     @IsNumber()
     @Min(0)
     duration_seconds: number; // độ dài file nói
+
 }

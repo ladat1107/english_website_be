@@ -7,6 +7,7 @@ import { Model, Types } from 'mongoose';
 import { SpeechToTextService } from '@/groq/speech-to-text.service';
 import { AIAnalysisService } from '@/groq/ai-analysis.service';
 import { SpeakingAttemptService } from '@/speaking-attempt/speaking-attempt.service';
+import { checkLanguage } from '@/utils/functions/function';
 
 @Injectable()
 export class SpeakingAnswerService {
@@ -49,9 +50,11 @@ export class SpeakingAnswerService {
   async updateAIAnalysis(id: string) {
     try {
       const answer = await this.speakingAnswerModel.findById(id);
+
       if (!answer) {
         throw new Error('Không tìm thấy câu trả lời');
       }
+
       await this.processAudioAnalysis(id, answer.audio_url, answer.question.question_text);
 
       return { message: 'AI analysis updated successfully' };
@@ -70,11 +73,11 @@ export class SpeakingAnswerService {
   private async processAudioAnalysis(
     answerId: string,
     audioUrl: string,
-    questionText: string
+    questionText: string,
   ): Promise<void> {
     try {
       // Bước 1: Chuyển đổi giọng nói thành văn bản
-      const transcription = await this.speechToTextService.transcribe(audioUrl);
+      const transcription = await this.speechToTextService.transcribe(audioUrl, checkLanguage(questionText));
 
       // Bước 2: Phân tích văn bản bằng AI
       const analysis = await this.aiAnalysisService.analyzeTranscript(
@@ -83,7 +86,7 @@ export class SpeakingAnswerService {
       );
 
       // Bước 3: Tính điểm số dựa trên phân tích
-      const score = this.aiAnalysisService.calculateScore(analysis);
+
 
       // Bước 4: Cập nhật kết quả vào database
       await this.speakingAnswerModel.findByIdAndUpdate(answerId, {
@@ -94,7 +97,7 @@ export class SpeakingAnswerService {
             error: analysis.error,
             ai_fix: analysis.ai_fix
           },
-          score: score
+          score: analysis.score
         }
       });
     } catch (error) {

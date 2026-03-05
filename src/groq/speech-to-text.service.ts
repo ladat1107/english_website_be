@@ -12,11 +12,11 @@ export class SpeechToTextService {
         this.groq = new Groq({ apiKey: this.configService.get<string>('groq.apiKey') });
     }
 
-    async transcribe(audioUrl: string) {
+    async transcribe(audioUrl: string, language: string = 'en') {
         const response = await this.groq.audio.transcriptions.create({
             model: "whisper-large-v3",
             url: audioUrl,
-            language: "en",
+            language: language,
         });
 
         return { text: response.text };
