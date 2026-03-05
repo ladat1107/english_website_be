@@ -6,4 +6,9 @@ export default registerAs('mail', () => ({
     user: process.env.MAIL_USER,
     pass: process.env.MAIL_PASS,
     from: process.env.MAIL_FROM,
+
+    brevoApiKey: process.env.BREVO_API_KEY,
+    senderName: process.env.MAIL_SENDER_NAME,
+    senderEmail: process.env.MAIL_SENDER_EMAIL,
+
 }));

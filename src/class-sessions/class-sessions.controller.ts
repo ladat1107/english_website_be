@@ -25,6 +25,7 @@ export class ClassSessionsController {
     return this.classSessionsService.findMyClassSessions(req.user);
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.classSessionsService.findOne(id);

@@ -9,6 +9,7 @@ import { Model, Types } from 'mongoose';
 import { ClassSessionsService } from '@/class-sessions/class-sessions.service';
 import dayjs from 'dayjs';
 import { MailService } from '@/mail/mail.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ParticipantsService {
@@ -17,7 +18,8 @@ export class ParticipantsService {
     @InjectModel(Participant.name)
     private readonly participantModel: Model<Participant>,
     private classSessionsService: ClassSessionsService,
-    private mailService: MailService
+    private mailService: MailService,
+    private configService: ConfigService
   ) { }
 
   async create(createParticipantDto: CreateParticipantDto, user: JwtPayload) {
@@ -55,14 +57,21 @@ export class ParticipantsService {
       });
 
       if (createdParticipant) {
-        this.mailService.sendClassScheduleMail(user.email, {
-          userName: user.full_name,
-          title: classSession.title,
-          description: classSession.description,
-          date: dayjs(classSession.date).format('DD/MM/YYYY'),
-          startTime: classSession.startTime,
-          endTime: classSession.endTime,
-          link: classSession.link,
+        await this.mailService.sendMail({
+          to: user.email,
+          subject: 'Thông báo lịch học mới - Khailingo',
+          template: 'class-schedule',
+          context: {
+            userName: user.full_name,
+            title: classSession.title,
+            description: classSession.description,
+            date: dayjs(classSession.date).format('DD/MM/YYYY'),
+            startTime: classSession.startTime,
+            endTime: classSession.endTime,
+            link: classSession.link,
+            frontendUrl: this.configService.get('app.clientUrl'),
+            zaloGroupUrl: this.configService.get<string>('app.zaloGroupUrl'),
+          }
         });
       }
       return createdParticipant;

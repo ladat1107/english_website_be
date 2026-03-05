@@ -5,12 +5,14 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ParticipantSchema } from './schemas/participant.schemas';
 import { ClassSessionsModule } from '@/class-sessions/class-sessions.module';
 import { MailModule } from '@/mail/mail.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: 'Participant', schema: ParticipantSchema }]),
     ClassSessionsModule,
-    MailModule
+    MailModule,
+    ConfigModule,
   ],
   controllers: [ParticipantsController],
   providers: [ParticipantsService],

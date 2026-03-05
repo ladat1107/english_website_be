@@ -28,4 +28,8 @@ export const configValidationSchema = Joi.object({
     MAIL_FROM: Joi.string().required(),
 
     ZALO_GROUP_URL: Joi.string().required(),
+
+    BREVO_API_KEY: Joi.string().required(),
+    MAIL_SENDER_NAME: Joi.string().required(),
+    MAIL_SENDER_EMAIL: Joi.string().email().required(),
 });
