@@ -168,16 +168,21 @@ export class AuthController {
   async logout(@Req() req: any, @Res({ passthrough: true }) res: Response) {
     try {
       const user = req.user as { _id: string };
+
       if (user?._id) {
         await this.authService.logout(user._id);
       }
-    } catch (error) {
-      // Ignore error khi logout
-    }
+    } catch { }
 
-    // Xóa cookies
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken');
+    const cookieOptions = {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none' as const,
+      path: '/',
+    };
+
+    res.clearCookie('accessToken', cookieOptions);
+    res.clearCookie('refreshToken', cookieOptions);
 
     return { message: 'Đăng xuất thành công' };
   }
