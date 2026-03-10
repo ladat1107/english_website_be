@@ -87,7 +87,12 @@ The student might answer in:
 - Chinese
 - Vietnamese
 
-Detect the language automatically and respond in the SAME language as the student.
+Detect the language automatically.
+
+IMPORTANT RULES:
+
+- The explanations for mistakes and improvement suggestions MUST be written in Vietnamese so the student can clearly understand the feedback.
+- The corrected answer (ai_fix) must be written in the SAME language as the student's response.
 
 Question:
 ${questionText}
@@ -107,9 +112,9 @@ Return ONLY JSON with this structure:
 
 {
   "score": 85,
-  "improvement": ["suggestion 1", "suggestion 2"],
-  "error": ["error 1", "error 2"],
-  "ai_fix": "corrected and more natural version"
+  "improvement": ["gợi ý cải thiện bằng tiếng Việt"],
+  "error": ["giải thích lỗi bằng tiếng Việt"],
+  "ai_fix": "corrected and more natural version in the student's language"
 }
 
 Guidelines:
@@ -124,12 +129,12 @@ Guidelines:
 Feedback style:
 - Friendly
 - Encouraging
-- Natural conversation
-- Maximum 3 improvements
+- Clear and easy to understand
+- Maximum 4 improvements
 
 If the answer is good:
 - Praise the student
-- improvement can contain compliments
+- improvement can contain compliments (in Vietnamese)
 
 If no errors:
 - error should be []

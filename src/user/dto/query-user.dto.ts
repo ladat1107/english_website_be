@@ -14,4 +14,8 @@ export class QueryUserDto extends PaginationDto {
     @IsOptional()
     @IsEnum(ProficiencyLevel, { message: 'Level không hợp lệ' })
     current_level?: ProficiencyLevel;
+
+    @IsOptional()
+    @IsString()
+    booking_test?: string;
 }

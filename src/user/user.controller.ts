@@ -29,6 +29,20 @@ export class UsersController {
     return this.usersService.updateProfile(updateProfileDto, req.user);
   }
 
+  @Patch('booking-test')
+  async updateBookingTest(@Body() updateProfileDto: UpdateProfileDto, @Request() req: any) {
+    const user = await this.usersService.findById(req.user._id);
+    
+    let data: any = {
+      booking_test: new Date(),
+    };
+
+    if (user && !user.phone) {
+      data.phone = updateProfileDto.phone;
+    }
+    return this.usersService.update(req.user._id, data);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);

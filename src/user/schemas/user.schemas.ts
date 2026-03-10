@@ -67,6 +67,9 @@ export class User {
         default: []
     })
     learning_goals: string[];
+
+    @Prop({ default: null })
+    booking_test: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

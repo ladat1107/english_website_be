@@ -9,6 +9,7 @@ import { calculateSkip, createPaginatedResponse } from '@/common/dto/pagination.
 import { buildVietnameseRegex } from '@/utils/functions/function';
 import { JwtPayload } from '@/auth/auth.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class UsersService {
@@ -29,13 +30,16 @@ export class UsersService {
 
   async findAll(queryUserDto: QueryUserDto) {
     try {
-      const { page = 1, limit = 10, search, role, current_level } = queryUserDto;
+      const { page = 1, limit = 10, search, role, current_level, booking_test } = queryUserDto;
       const matchStage: any = {};
       if (role) {
         matchStage.role = role;
       }
       if (current_level) {
         matchStage.current_level = current_level;
+      }
+      if (booking_test) {
+        matchStage.booking_test = { $gte: dayjs(booking_test).startOf('day').toDate() };
       }
 
       const searchStage = search ? {

@@ -3,7 +3,7 @@ import { CreateSpeakingAnswerDto } from './dto/create-speaking-answer.dto';
 import { UpdateSpeakingAnswerDto } from './dto/update-speaking-answer.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { SpeakingAnswer } from './schemas/speaking-answer.schemas';
-import { Model, Types } from 'mongoose';
+import { ClientSession, Model, Types } from 'mongoose';
 import { SpeechToTextService } from '@/groq/speech-to-text.service';
 import { AIAnalysisService } from '@/groq/ai-analysis.service';
 import { SpeakingAttemptService } from '@/speaking-attempt/speaking-attempt.service';
@@ -161,5 +161,11 @@ export class SpeakingAnswerService {
       throw new Error('Không tìm thấy câu trả lời để xóa');
     }
     return deletedAnswer;
+  }
+
+  async removeByAttemptIds(attemptIds: Types.ObjectId[], session?: ClientSession): Promise<any> {
+    return this.speakingAnswerModel
+      .deleteMany({ attempt_id: { $in: attemptIds } })
+      .session(session || null);
   }
 }

@@ -9,6 +9,7 @@ import { QuerySpeakingExamDto } from './dto/query-speaking-exam';
 import { calculateSkip, createPaginatedResponse } from '@/common/dto/pagination.dto';
 import { UserRole } from '@/utils/constants/enum';
 import { buildVietnameseRegex } from '@/utils/functions/function';
+import { SpeakingAttemptService } from '@/speaking-attempt/speaking-attempt.service';
 
 @Injectable()
 export class SpeakingExamService {
@@ -16,6 +17,7 @@ export class SpeakingExamService {
   constructor(
     @InjectModel(SpeakingExam.name)
     private readonly speakingExamModel: Model<SpeakingExamDocument>,
+    private speakingAttemptService: SpeakingAttemptService,
   ) { }
 
   async create(createSpeakingExamDto: CreateSpeakingExamDto, user: JwtPayload) {
@@ -107,10 +109,29 @@ export class SpeakingExamService {
   }
 
   async remove(id: string) {
-    const speakingExam = await this.speakingExamModel.findByIdAndDelete(id);
-    if (!speakingExam) {
-      throw new NotFoundException('Đề giao tiếp không tồn tại');
+    const session = await this.speakingExamModel.db.startSession();
+
+    session.startTransaction();
+
+    try {
+      const exam = await this.speakingExamModel
+        .findByIdAndDelete(id)
+        .session(session);
+
+      if (!exam) {
+        throw new NotFoundException('Đề giao tiếp không tồn tại');
+      }
+
+      await this.speakingAttemptService.removeByExamId(id, session);
+
+      await session.commitTransaction();
+
+      return exam;
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
     }
-    return speakingExam;
   }
 }
