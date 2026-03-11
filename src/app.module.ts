@@ -29,6 +29,7 @@ import { ClassSessionsModule } from './class-sessions/class-sessions.module';
 import { ParticipantsModule } from './participants/participants.module';
 import mailConfig from './config/mail.config';
 import { MailModule } from './mail/mail.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -61,7 +62,8 @@ import { MailModule } from './mail/mail.module';
     SocketModule,
     ClassSessionsModule,
     ParticipantsModule,
-    MailModule
+    MailModule,
+    ChatModule
   ],
   controllers: [AppController],
   providers: [AppService,
