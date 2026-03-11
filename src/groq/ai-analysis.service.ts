@@ -234,7 +234,7 @@ Always return valid JSON:
                     }))
                 ],
                 temperature: 0.7, // Độ sáng tạo vừa phải
-                max_tokens: 700, //
+                max_tokens: 400, //
                 response_format: { type: "json_object" } // Yêu cầu trả về JSON
             });
 
