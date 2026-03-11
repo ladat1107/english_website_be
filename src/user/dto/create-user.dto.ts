@@ -41,4 +41,7 @@ export class CreateUserDto {
         message: 'Điện thoại phải là 10 chữ số',
     })
     phone?: string;
+
+    @IsOptional()
+    booking_test?: Date;
 }

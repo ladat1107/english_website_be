@@ -4,7 +4,7 @@ import { UpdateSpeakingAttemptDto } from './dto/update-speaking-attempt.dto';
 import { QueryGradingListDto } from './dto/query-grading-list.dto';
 import { JwtPayload } from '@/auth/auth.service';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { ClientSession, Model, Types } from 'mongoose';
 import { SpeakingAnswerService } from '@/speaking-answer/speaking-answer.service';
 import { SpeakingAttempt } from './schemas/speaking-attempt.schemas';
 import { ExamAttemptStatus, UserRole } from '@/utils/constants/enum';
@@ -414,5 +414,27 @@ export class SpeakingAttemptService {
 
   async remove(id: string) {
     return `This action removes a #${id} speakingAttempt`;
+  }
+  async removeByExamId(examId: string, session?: ClientSession) {
+    try {
+      const attempts = await this.speakingAttemptModel
+        .find({ exam_id: new Types.ObjectId(examId) })
+        .session(session || null);
+
+      const attemptIds = attempts.map((a) => a._id);
+
+      // gọi service khác
+      await this.speakingAnswerService.removeByAttemptIds(
+        attemptIds,
+        session,
+      );
+
+      await this.speakingAttemptModel
+        .deleteMany({ exam_id: new Types.ObjectId(examId) })
+        .session(session || null);
+    } catch (error) {
+      console.error(`Error removing speaking attempts for exam ${examId}:`, error);
+      throw error;
+    }
   }
 }

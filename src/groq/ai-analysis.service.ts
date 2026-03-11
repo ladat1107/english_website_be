@@ -1,3 +1,4 @@
+import { CreateChatAIDto } from '@/chat/dto/create-chat-ai.dto';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Groq from 'groq-sdk';
@@ -13,6 +14,10 @@ export interface AIAnalysisResult {
     score?: number; // Điểm số từ 0-100, có thể được tính riêng
 }
 
+interface AIResponse {
+    type: "response";
+    message: string;
+}
 @Injectable()
 export class AIAnalysisService {
     private groq: Groq;
@@ -87,7 +92,12 @@ The student might answer in:
 - Chinese
 - Vietnamese
 
-Detect the language automatically and respond in the SAME language as the student.
+Detect the language automatically.
+
+IMPORTANT RULES:
+
+- The explanations for mistakes and improvement suggestions MUST be written in Vietnamese so the student can clearly understand the feedback.
+- The corrected answer (ai_fix) must be written in the SAME language as the student's response.
 
 Question:
 ${questionText}
@@ -107,9 +117,9 @@ Return ONLY JSON with this structure:
 
 {
   "score": 85,
-  "improvement": ["suggestion 1", "suggestion 2"],
-  "error": ["error 1", "error 2"],
-  "ai_fix": "corrected and more natural version"
+  "improvement": ["gợi ý cải thiện bằng tiếng Việt"],
+  "error": ["giải thích lỗi bằng tiếng Việt"],
+  "ai_fix": "corrected and more natural version in the student's language"
 }
 
 Guidelines:
@@ -124,12 +134,12 @@ Guidelines:
 Feedback style:
 - Friendly
 - Encouraging
-- Natural conversation
-- Maximum 3 improvements
+- Clear and easy to understand
+- Maximum 4 improvements
 
 If the answer is good:
 - Praise the student
-- improvement can contain compliments
+- improvement can contain compliments (in Vietnamese)
 
 If no errors:
 - error should be []
@@ -166,6 +176,81 @@ Return ONLY JSON.
                     ? Math.max(0, Math.min(100, aiResponse.score))
                     : 0
         };
+    }
+
+    //=============================================================================================================================================
+
+    async chatWithAI(chatdto: CreateChatAIDto): Promise<string> {
+        try {
+            const promtChatAi = `
+You are KhaiLingo AI — a friendly and knowledgeable language teacher on the KhaiLingo learning platform.
+
+Communication style:
+- Warm, natural, and human-like.
+- Encouraging like a real tutor.
+- Adapt explanations to the learner’s level.
+- Be clear, accurate, and educational.
+
+Main purpose:
+- Help learners improve foreign language skills (English, Chinese).
+- Teach vocabulary, grammar, pronunciation, expressions, translations, and conversation.
+- Provide corrections and examples when learners make mistakes.
+
+Language output guidelines:
+- Adapt the format depending on what best helps the learner.
+- For Chinese:
+  - You may use Chinese characters (汉字), pinyin, explanations, or examples.
+  - Choose the format that best supports learning.
+  - If pronunciation is important, include pinyin.
+  - If vocabulary learning, you may include character + pinyin + meaning.
+- Do not force one format.
+
+Topic handling:
+- If the user asks something outside languages, do not refuse.
+- Gently redirect the conversation toward language learning.
+
+Response formatting:
+- You may format answers using Markdown when helpful for learning.
+- Use lists, bold text, examples, or sections to make explanations clearer.
+
+Output format:
+Always return valid JSON:
+
+{
+  "type": "response",
+  "message": "<your answer in Markdown>"
+}
+`;
+            const completion = await this.groq.chat.completions.create({
+                model: "llama-3.3-70b-versatile", // Model mạnh cho phân tích ngữ nghĩa
+                messages: [
+                    {
+                        role: "system",
+                        content: promtChatAi
+                    },
+                    ...chatdto.messages.map(msg => ({
+                        role: msg.role as "user" | "assistant",
+                        content: msg.content
+                    }))
+                ],
+                temperature: 0.7, // Độ sáng tạo vừa phải
+                max_tokens: 700, //
+                response_format: { type: "json_object" } // Yêu cầu trả về JSON
+            });
+
+            const content = completion.choices[0]?.message?.content;
+
+            if (!content) {
+                return "Xin lỗi, đã xảy ra lỗi khi kết nối với AI.";
+            }
+
+            const parsed: AIResponse = JSON.parse(content);
+
+            return parsed.message;
+        } catch (error) {
+            console.error('Error in AI chat:', error);
+            return "Xin lỗi, đã xảy ra lỗi khi kết nối với AI.";
+        }
     }
 
 }

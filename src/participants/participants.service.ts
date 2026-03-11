@@ -48,8 +48,6 @@ export class ParticipantsService {
         throw new Error('Bạn đã đăng ký tham gia lớp học này rồi');
       }
 
-
-
       const createdParticipant = await this.participantModel.create({
         class_session_id: new Types.ObjectId(class_session_id),
         user_id: new Types.ObjectId(user._id),
@@ -59,7 +57,7 @@ export class ParticipantsService {
       if (createdParticipant) {
         await this.mailService.sendMail({
           to: user.email,
-          subject: 'Thông báo lịch học mới - Khailingo',
+          subject: 'Khailingo - Thông báo lịch học mới',
           template: 'class-schedule',
           context: {
             userName: user.full_name,
