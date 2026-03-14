@@ -12,6 +12,11 @@ export class CreateVocabularyDto {
     @IsNotEmpty({ message: "Nghĩa không được để trống" })
     @IsString()
     meaning: string;
+
+    // Loại từ (danh từ, động từ, tính từ, v.v.)
+    @IsOptional()
+    @IsString()
+    type?: string;
 }
 export class CreateSpeakingExamDto {
 

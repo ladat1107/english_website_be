@@ -24,6 +24,9 @@ class Vocabulary {
 
     @Prop({ required: true, type: String })
     meaning: string;
+
+    @Prop({ required: false, type: String })
+    type: string; // Loại từ (danh từ, động từ, tính từ, v.v.)
 }
 
 const VocabularySchema = SchemaFactory.createForClass(Vocabulary);
