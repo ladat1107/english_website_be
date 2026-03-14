@@ -1,51 +1,53 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { CreateUserFlashcardDto } from './dto/create-user-flashcard.dto';
-import { UserFlashcard } from './schemas/user-flashcard.schemas';
+import { Model, Types } from 'mongoose';
+import { UserFlashcard, UserFlashcardDocument } from './schemas/user-flashcard.schemas';
+import { FlashCardDeckDocument } from '@/flash-card-deck/schemas/flash-card-deck.schemas';
+import { JwtPayload } from '@/auth/auth.service';
+import { UserRole } from '@/utils/constants/enum';
+import { UsersService } from '@/user/user.service';
 
 @Injectable()
 export class UserFlashcardService {
   constructor(
-    @InjectModel(UserFlashcard.name) private userFlashcardModel: Model<UserFlashcard>,
+    @InjectModel(UserFlashcard.name)
+    private readonly userFlashcardModel: Model<UserFlashcardDocument>,
+    private userServive: UsersService,
   ) { }
 
-  /**
-   * Lưu kết quả học flashcard (ghi đè kết quả cũ)
-   * Tự động tính toán số câu đúng/sai
-   */
-  async saveResult(createUserFlashcardDto: CreateUserFlashcardDto) {
-    // TODO: Lấy user_id từ JWT token trong request
-    const user_id = 'temp_user_id'; // Placeholder
+  async create(flashDesk: FlashCardDeckDocument, user: JwtPayload, session: any) {
+    try {
+      if (user.role === UserRole.ADMIN) {
+        const users = await this.userServive.getUserByRole([UserRole.STUDENT, UserRole.TEACHER]);
+        const userIds = users.map(u => new Types.ObjectId(u._id));
+        const createUserFlashCard = await this.userFlashcardModel.insertMany(
+          userIds.map(user_id => ({
+            user_id,
+            deck_id: new Types.ObjectId(flashDesk._id),
+          })),
+          {
+            session,
+            ordered: false // nếu có lỗi (ví dụ duplicate key) sẽ bỏ qua và tiếp tục insert các bản ghi còn lại -> không dừng toàn bộ quá trình insert, đảm bảo tất cả user đều có kết quả học flashcard dù có lỗi ở một vài bản ghi
+          }
+        );
+        return createUserFlashCard;
 
-    const correctCards = createUserFlashcardDto.cards_result.filter(c => c.is_correct).length;
-    const incorrectCards = createUserFlashcardDto.cards_result.filter(c => !c.is_correct).length;
+      } else {
+        const createUserFlashCard = await this.userFlashcardModel.create([
+          {
+            user_id: new Types.ObjectId(user._id),
+            deck_id: new Types.ObjectId(flashDesk._id),
+          },
+        ],
+          { session });
+        return createUserFlashCard;
+      }
 
-    // Upsert: Tạo mới hoặc cập nhật nếu đã tồn tại
-    return this.userFlashcardModel.findOneAndUpdate(
-      { user_id, deck_id: createUserFlashcardDto.deck_id },
-      {
-        user_id,
-        deck_id: createUserFlashcardDto.deck_id,
-        total_cards: createUserFlashcardDto.cards_result.length,
-        correct_cards: correctCards,
-        incorrect_cards: incorrectCards,
-        last_studied_at: new Date(),
-        cards_result: createUserFlashcardDto.cards_result,
-      },
-      { new: true, upsert: true },
-    );
+    } catch (error) {
+      console.error('Error saving user flashcard result:', error);
+      throw error;
+    }
   }
-
-  /**
-   * Lấy kết quả học của user cho 1 deck
-   */
-  async getByDeck(deckId: string) {
-    // TODO: Lấy user_id từ JWT token
-    const user_id = 'temp_user_id';
-    return this.userFlashcardModel.findOne({ user_id, deck_id: deckId });
-  }
-
   /**
    * Lấy tất cả kết quả học của user
    */

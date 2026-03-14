@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { FlashCardDeckService } from './flash-card-deck.service';
 import { CreateFlashCardDeckDto } from './dto/create-flash-card-deck.dto';
 import { UpdateFlashCardDeckDto } from './dto/update-flash-card-deck.dto';
@@ -8,8 +8,8 @@ export class FlashCardDeckController {
   constructor(private readonly flashCardDeckService: FlashCardDeckService) {}
 
   @Post()
-  create(@Body() createFlashCardDeckDto: CreateFlashCardDeckDto) {
-    return this.flashCardDeckService.create(createFlashCardDeckDto);
+  create(@Body() createFlashCardDeckDto: CreateFlashCardDeckDto, @Req() req) {
+    return this.flashCardDeckService.create(createFlashCardDeckDto, req.user);
   }
 
   @Get()
@@ -19,16 +19,16 @@ export class FlashCardDeckController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.flashCardDeckService.findOne(+id);
+    return this.flashCardDeckService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFlashCardDeckDto: UpdateFlashCardDeckDto) {
-    return this.flashCardDeckService.update(+id, updateFlashCardDeckDto);
+  update(@Param('id') id: string, @Body() updateFlashCardDeckDto: UpdateFlashCardDeckDto, @Req() req) {
+    return this.flashCardDeckService.update(id, updateFlashCardDeckDto, req.user);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.flashCardDeckService.remove(+id);
+    return this.flashCardDeckService.remove(id);
   }
 }
