@@ -1,6 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Req } from '@nestjs/common';
 import { UserFlashcardService } from './user-flashcard.service';
 import { CreateUserFlashcardDto } from './dto/create-user-flashcard.dto';
+import { Public } from '@/common/decorators/public.decorator';
+import { QueryFlashCardDeckDto } from '@/flash-card-deck/dto/query-flash-card-desk.dto';
 
 @Controller('user-flashcard')
 export class UserFlashcardController {
@@ -11,9 +13,10 @@ export class UserFlashcardController {
     return null;
   }
 
+  @Public()
   @Get()
-  findAll() {
-    return this.userFlashcardService.findAll();
+  findAll(@Query() query: QueryFlashCardDeckDto, @Req() req) {
+    return this.userFlashcardService.findAll(query, req?.user);
   }
 
   @Delete(':id')
