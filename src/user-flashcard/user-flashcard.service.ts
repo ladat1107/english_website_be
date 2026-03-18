@@ -120,6 +120,42 @@ export class UserFlashcardService {
   }
 
   /**
+   * Lấy danh sách deck của user để add flashcard
+   * Bao gồm: deck của user + deck admin
+   */
+  async getMyDecks(user: JwtPayload) {
+    try {
+      const userId = new Types.ObjectId(user._id);
+
+      const pipeline: any = [
+        {
+          $match: { created_by: userId },
+        },
+        {
+          $project: {
+            _id: 1,
+            title: 1,
+            description: 1,
+            image: 1,
+            topic: 1,
+            type: 1,
+            flashcards_count: { $size: '$flashcards' }
+          }
+        },
+        { $sort: { title: 1 } }
+      ];
+
+      const result = await this.userFlashcardModel.db.collection('flashcarddecks').aggregate(pipeline).toArray();
+
+      return result;
+
+    } catch (error) {
+      console.error('Error fetching user decks:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Cập nhật tiến độ học - ghi nhận kết quả correct/incorrect cho từng card
    * Tính toán lại correct_cards, incorrect_cards từ cards_result
    */

@@ -26,6 +26,12 @@ export class UserFlashcardController {
     return this.userFlashcardService.findAll(query, req?.user);
   }
 
+  /** Lấy danh sách deck của user hiện tại (để thêm flashcard) */
+  @Get('my-decks')
+  getMyDecks(@Req() req) {
+    return this.userFlashcardService.getMyDecks(req.user);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userFlashcardService.remove(id);
