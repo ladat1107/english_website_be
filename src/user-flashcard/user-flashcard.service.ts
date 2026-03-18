@@ -7,8 +7,10 @@ import { JwtPayload } from '@/auth/auth.service';
 import { UserRole } from '@/utils/constants/enum';
 import { UsersService } from '@/user/user.service';
 import { QueryFlashCardDeckDto } from '@/flash-card-deck/dto/query-flash-card-desk.dto';
+import { UpdateStudyProgressDto } from './dto/update-user-flashcard.dto';
 import { buildVietnameseRegex } from '@/utils/functions/function';
 import { calculateSkip, createPaginatedResponse } from '@/common/dto/pagination.dto';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class UserFlashcardService {
@@ -104,12 +106,82 @@ export class UserFlashcardService {
       ];
       const result = await this.userFlashcardModel.aggregate(pipeline);
 
-      if (!result || result.length > 0) {
+      // Fix: điều kiện đúng là result.length === 0 (không có dữ liệu)
+      if (!result || result.length === 0) {
         return createPaginatedResponse([], 0, page, limit);
       }
 
+      return createPaginatedResponse(result[0].data, result[0]?.metadata?.total || 0, page, limit);
+
     } catch (error) {
       console.error('Error fetching user flashcard results:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cập nhật tiến độ học - ghi nhận kết quả correct/incorrect cho từng card
+   * Tính toán lại correct_cards, incorrect_cards từ cards_result
+   */
+  async updateProgress(dto: UpdateStudyProgressDto, user: JwtPayload) {
+    try {
+      const userId = new Types.ObjectId(user._id);
+      const deckId = new Types.ObjectId(dto.deck_id);
+
+      // Lấy record hiện tại (hoặc tạo mới nếu chưa có)
+      let userFlashcard = await this.userFlashcardModel.findOne({
+        user_id: userId,
+        deck_id: deckId,
+      });
+
+      if (!userFlashcard) {
+        userFlashcard = await this.userFlashcardModel.create({
+          user_id: userId,
+          deck_id: deckId,
+          cards_result: [],
+        });
+      }
+
+      // Merge kết quả mới vào cards_result hiện tại
+      const existingResults = new Map(
+        userFlashcard.cards_result.map((r) => [r.card_id.toString(), r]),
+      );
+
+      for (const cardResult of dto.cards_result) {
+        existingResults.set(cardResult.card_id, {
+          card_id: new Types.ObjectId(cardResult.card_id) as any,
+          status: cardResult.status,
+          last_studied_at: dayjs().toDate(),
+        });
+      }
+
+      const mergedResults = Array.from(existingResults.values());
+
+      // Tính lại số correct/incorrect
+      const correct_cards = mergedResults.filter(
+        (r) => r.status === 'correct',
+      ).length;
+      const incorrect_cards = mergedResults.filter(
+        (r) => r.status === 'incorrect',
+      ).length;
+
+      // Cập nhật
+      const updated = await this.userFlashcardModel.findOneAndUpdate(
+        { user_id: userId, deck_id: deckId },
+        {
+          $set: {
+            cards_result: mergedResults,
+            correct_cards,
+            incorrect_cards,
+            last_studied_at: new Date(),
+          },
+        },
+        { new: true },
+      );
+
+      return updated;
+    } catch (error) {
+      console.error('Error updating study progress:', error);
       throw error;
     }
   }

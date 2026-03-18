@@ -170,14 +170,20 @@ export class FlashCardDeckService {
             preserveNullAndEmptyArrays: true // nếu user chưa có deck thì vẫn giữ record và set user_flashcard = null
           }
         },
-        ...[{
-          $match: {
-            $or: [
-              { is_admin: true },
-              userId ? { $and: [{ 'userFlashcard.user_id': userId }] } : null
-            ]
-          }
-        }], // B3: nếu có user thì hiển thị cả deck thường và admin, nếu không có user thì chỉ hiển thị deck do admin tạo
+        // B3: nếu có user thì hiển thị cả deck admin và deck của user, không có user thì chỉ hiện admin
+        ...(userId
+          ? [{
+            $match: {
+              $or: [
+                { is_admin: true },
+                { 'userFlashcard.user_id': userId }
+              ]
+            }
+          }]
+          : [{
+            $match: { is_admin: true }
+          }]
+        ),
         {
           $lookup: {
             from: 'users',
@@ -230,6 +236,27 @@ export class FlashCardDeckService {
 
   }
 
+  /** Lấy thông tin deck công khai - không cần auth, cho SSR metadata */
+  async findOnePublic(id: string) {
+    try {
+      const deck = await this.flashCardDeckModel.findById(id)
+        .select('title description image topic type flashcards is_admin created_by createdAt')
+        .lean();
+
+      if (!deck) {
+        throw new NotFoundException("Không tìm thấy bộ thẻ");
+      }
+
+      return {
+        ...deck,
+        flashcardsCount: deck.flashcards?.length || 0,
+      };
+    } catch (error) {
+      console.error('Error finding public flashcard deck:', error);
+      throw error;
+    }
+  }
+
   async findOne(id: string, user: JwtPayload) {
     try {
       const userId = new Types.ObjectId(user._id);
@@ -251,11 +278,11 @@ export class FlashCardDeckService {
               }
             }
           ],
-          as: 'userFlashcards'
+          as: 'userFlashcard' // Đổi từ plural sang singular để khớp với frontend
         },
       }, {
         $unwind: {
-          path: '$userFlashcards',
+          path: '$userFlashcard',
           preserveNullAndEmptyArrays: true
         }
       }]
@@ -265,7 +292,8 @@ export class FlashCardDeckService {
         throw new NotFoundException("Không tìm thấy bộ thẻ");
       }
 
-      if (!flashCardDeck[0].userFlashcards && user.role !== UserRole.ADMIN) {
+      // Nếu user chưa có record userFlashcard, tự động tạo (trừ admin)
+      if (!flashCardDeck[0].userFlashcard && user.role !== UserRole.ADMIN) {
         const userFlashcard = await this.userFlashcardService.create(flashCardDeck[0], user);
         flashCardDeck[0].userFlashcard = userFlashcard;
       }

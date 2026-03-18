@@ -25,6 +25,13 @@ export class FlashCardDeckController {
     return this.flashCardDeckService.findAllForClient(query, req.user);
   }
 
+  /** Lấy thông tin deck công khai (cho SSR metadata) */
+  @Public()
+  @Get('public/:id')
+  findOnePublic(@Param('id') id: string) {
+    return this.flashCardDeckService.findOnePublic(id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string, @Req() req) {
     return this.flashCardDeckService.findOne(id, req.user);

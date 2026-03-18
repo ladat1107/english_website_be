@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Req } from '@nestjs/common';
 import { UserFlashcardService } from './user-flashcard.service';
 import { CreateUserFlashcardDto } from './dto/create-user-flashcard.dto';
+import { UpdateStudyProgressDto } from './dto/update-user-flashcard.dto';
 import { Public } from '@/common/decorators/public.decorator';
 import { QueryFlashCardDeckDto } from '@/flash-card-deck/dto/query-flash-card-desk.dto';
 
@@ -11,6 +12,12 @@ export class UserFlashcardController {
   @Post()
   create(@Body() createUserFlashcardDto: CreateUserFlashcardDto) {
     return null;
+  }
+
+  /** Cập nhật tiến độ học flashcard sau mỗi session */
+  @Patch('progress')
+  updateProgress(@Body() dto: UpdateStudyProgressDto, @Req() req) {
+    return this.userFlashcardService.updateProgress(dto, req.user);
   }
 
   @Public()
