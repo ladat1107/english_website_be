@@ -81,3 +81,14 @@ export enum TypeLanguage {
     ENGLISH = 'English',
     CHINESE = 'Chinese',
 }
+
+export enum FlashcardTopic {
+  BASIC = "basic",           // Cơ bản
+  ADVANCED = "advanced",     // Nâng cao
+  TOEIC = "toeic",           // Ôn thi TOEIC
+  IELTS = "ielts",           // Ôn thi IELTS
+  HSK = "hsk",               // Ôn thi HSK
+  ACADEMIC = "academic",     // Học thuật
+  DAILY = "daily",           // Giao tiếp
+  MIXED = "mixed",           // Hỗn hợp
+}

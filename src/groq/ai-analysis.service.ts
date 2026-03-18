@@ -1,4 +1,5 @@
 import { CreateChatAIDto } from '@/chat/dto/create-chat-ai.dto';
+import { CreateFlashcardDto } from '@/flash-card-deck/dto/create-flash-card-deck.dto';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Groq from 'groq-sdk';
@@ -180,47 +181,8 @@ Return ONLY JSON.
 
     //=============================================================================================================================================
 
-    async chatWithAI(chatdto: CreateChatAIDto): Promise<string> {
+    async chatWithAI(chatdto: CreateChatAIDto, promtChatAi: string): Promise<string> {
         try {
-            const promtChatAi = `
-You are KhaiLingo AI — a friendly and knowledgeable language teacher on the KhaiLingo learning platform.
-
-Communication style:
-- Warm, natural, and human-like.
-- Encouraging like a real tutor.
-- Adapt explanations to the learner’s level.
-- Be clear, accurate, and educational.
-
-Main purpose:
-- Help learners improve foreign language skills (English, Chinese).
-- Teach vocabulary, grammar, pronunciation, expressions, translations, and conversation.
-- Provide corrections and examples when learners make mistakes.
-
-Language output guidelines:
-- Adapt the format depending on what best helps the learner.
-- For Chinese:
-  - You may use Chinese characters (汉字), pinyin, explanations, or examples.
-  - Choose the format that best supports learning.
-  - If pronunciation is important, include pinyin.
-  - If vocabulary learning, you may include character + pinyin + meaning.
-- Do not force one format.
-
-Topic handling:
-- If the user asks something outside languages, do not refuse.
-- Gently redirect the conversation toward language learning.
-
-Response formatting:
-- You may format answers using Markdown when helpful for learning.
-- Use lists, bold text, examples, or sections to make explanations clearer.
-
-Output format:
-Always return valid JSON:
-
-{
-  "type": "response",
-  "message": "<your answer in Markdown>"
-}
-`;
             const completion = await this.groq.chat.completions.create({
                 model: "llama-3.3-70b-versatile", // Model mạnh cho phân tích ngữ nghĩa
                 messages: [
@@ -250,6 +212,45 @@ Always return valid JSON:
         } catch (error) {
             console.error('Error in AI chat:', error);
             return "Xin lỗi, đã xảy ra lỗi khi kết nối với AI.";
+        }
+    }
+
+    async generateFlashcard(word: string, promtAi: string): Promise<CreateFlashcardDto> {
+        const flashcardDefault: CreateFlashcardDto = {
+            text: word,
+            meaning: "Nghĩa của từ",
+        };
+        try {
+
+            const completion = await this.groq.chat.completions.create({
+                model: "llama-3.1-8b-instant",
+                temperature: 0.2,
+                max_tokens: 200,
+                messages: [
+                    {
+                        role: "system",
+                        content: promtAi
+                    },
+                    {
+                        role: "user",
+                        content: `Generate flashcard for word: ${word}`
+                    }
+                ],
+                response_format: { type: "json_object" } // Yêu cầu trả về JSON
+            });
+
+            const content = completion.choices[0]?.message?.content;
+
+            if (!content) {
+                return flashcardDefault;
+            }
+            const parsed: CreateFlashcardDto = JSON.parse(content);
+
+            return parsed;
+
+        } catch (error) {
+            console.error('Error in AI chat:', error);
+            return flashcardDefault;
         }
     }
 

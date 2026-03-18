@@ -10,6 +10,7 @@ import { buildVietnameseRegex } from '@/utils/functions/function';
 import { JwtPayload } from '@/auth/auth.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import dayjs from 'dayjs';
+import { UserRole } from '@/utils/constants/enum';
 
 @Injectable()
 export class UsersService {
@@ -194,6 +195,20 @@ export class UsersService {
   async getUserByIds(userIds: string[]) {
     try {
       const users = await this.userModel.find({ _id: { $in: userIds } }).exec();
+      return users;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
+  async getUserByRole(role: UserRole[]) {
+    try {
+      const users = await this.userModel.find({
+        role: { $in: role }
+      }, {
+        _id: 1, // sau này có thể thêm chứ không được xóa bớt các trường này vì liên quan đến việc gán quyền khi tạo flashcard deck
+      }).lean().exec();
       return users;
     } catch (error) {
       console.error(error);

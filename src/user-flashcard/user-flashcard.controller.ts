@@ -1,35 +1,35 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Req } from '@nestjs/common';
 import { UserFlashcardService } from './user-flashcard.service';
 import { CreateUserFlashcardDto } from './dto/create-user-flashcard.dto';
-import { UpdateUserFlashcardDto } from './dto/update-user-flashcard.dto';
+import { UpdateStudyProgressDto } from './dto/update-user-flashcard.dto';
+import { Public } from '@/common/decorators/public.decorator';
+import { QueryFlashCardDeckDto } from '@/flash-card-deck/dto/query-flash-card-desk.dto';
 
 @Controller('user-flashcard')
 export class UserFlashcardController {
   constructor(private readonly userFlashcardService: UserFlashcardService) { }
 
-  /**
-   * Tạo hoặc cập nhật kết quả học flashcard
-   * Nếu đã có kết quả cũ, sẽ ghi đè bằng kết quả mới
-   */
   @Post()
   create(@Body() createUserFlashcardDto: CreateUserFlashcardDto) {
-    return this.userFlashcardService.saveResult(createUserFlashcardDto);
+    return null;
   }
 
-  /**
-   * Lấy kết quả học của user cho 1 deck
-   */
-  @Get('deck/:deckId')
-  getByDeck(@Param('deckId') deckId: string) {
-    return this.userFlashcardService.getByDeck(deckId);
+  /** Cập nhật tiến độ học flashcard sau mỗi session */
+  @Patch('progress')
+  updateProgress(@Body() dto: UpdateStudyProgressDto, @Req() req) {
+    return this.userFlashcardService.updateProgress(dto, req.user);
   }
 
-  /**
-   * Lấy tất cả kết quả học của user
-   */
+  @Public()
   @Get()
-  findAll() {
-    return this.userFlashcardService.findAll();
+  findAll(@Query() query: QueryFlashCardDeckDto, @Req() req) {
+    return this.userFlashcardService.findAll(query, req?.user);
+  }
+
+  /** Lấy danh sách deck của user hiện tại (để thêm flashcard) */
+  @Get('my-decks')
+  getMyDecks(@Req() req) {
+    return this.userFlashcardService.getMyDecks(req.user);
   }
 
   @Delete(':id')

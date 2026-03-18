@@ -14,7 +14,6 @@ import { SpeakingExamModule } from './speaking-exam/speaking-exam.module';
 import { SpeakingAttemptModule } from './speaking-attempt/speaking-attempt.module';
 import { SpeakingAnswerModule } from './speaking-answer/speaking-answer.module';
 import { FlashCardDeckModule } from './flash-card-deck/flash-card-deck.module';
-import { FlashcardModule } from './flashcard/flashcard.module';
 import { UserFlashcardModule } from './user-flashcard/user-flashcard.module';
 import { AuthModule } from './auth/auth.module';
 import { SocketModule } from './socket/socket.module';
@@ -56,7 +55,6 @@ import { ChatModule } from './chat/chat.module';
     SpeakingAttemptModule,
     SpeakingAnswerModule,
     FlashCardDeckModule,
-    FlashcardModule,
     UserFlashcardModule,
     AuthModule,
     SocketModule,

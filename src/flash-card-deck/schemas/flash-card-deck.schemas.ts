@@ -1,14 +1,39 @@
+import { FlashcardTopic, TypeLanguage } from "@/utils/constants/enum";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
 
+@Schema({ timestamps: true })
+export class Flashcard {
+    // Văn bản chính (bắt buộc)
+    @Prop({ required: true, trim: true })
+    text: string;
+
+    @Prop({ default: '', trim: true })
+    transliteration: string; // Phiên âm (nếu có)
+
+    //Loại từ (danh từ, động từ, tính từ, v.v.)
+    @Prop({ required: false, type: String })
+    type: string;
+
+    // URL hình ảnh minh họa (tùy chọn)
+    @Prop({ default: null })
+    image_url: string;
+
+
+    //---- Mặt sau của thẻ (có thể có thêm ví dụ, ghi chú...) 
+    // Nghĩa của từ/ cụm từ
+    @Prop({ required: true, trim: true })
+    meaning: string;
+
+    // Các câu ví dụ sử dụng từ
+    @Prop({ type: String, default: null })
+    examples: string;
+}
+
+export const FlashcardSchema = SchemaFactory.createForClass(Flashcard);
+
 export type FlashCardDeckDocument = HydratedDocument<FlashCardDeck>;
 
-/**
- * Schema cho Bộ thẻ Flashcard
- * - Admin có thể tạo deck công khai (is_public = true) cho tất cả user sử dụng
- * - User có thể tạo deck riêng (is_public = false, created_by = user_id)
- * - User có thể copy deck công khai về để học (dùng UserFlashCardProgress để track)
- */
 @Schema({ timestamps: true })
 export class FlashCardDeck {
     // ID của người tạo deck (admin hoặc user)
@@ -25,30 +50,19 @@ export class FlashCardDeck {
 
     // Icon/hình đại diện cho bộ thẻ
     @Prop({ default: null })
-    icon: string;
+    image: string;
 
-    // Deck công khai (admin tạo) hay riêng tư (user tạo)
-    // true: mọi người đều thấy và có thể học
-    // false: chỉ người tạo mới thấy
+    @Prop({ default: FlashcardTopic.BASIC })
+    topic: FlashcardTopic;
+
+    @Prop({ default: TypeLanguage.ENGLISH })
+    type: TypeLanguage;
+
     @Prop({ default: false })
-    is_public: boolean;
+    is_admin: boolean; // true = do admin tạo, false = do user tạo
 
-    // Category/chủ đề của deck (vd: 'TOEIC', 'IELTS', 'Business English', 'Daily Conversation')
-    @Prop({ default: 'General', trim: true })
-    category: string;
-
-    // Cấp độ (Beginner, Intermediate, Advanced)
-    @Prop({ default: 'Beginner', trim: true })
-    level: string;
-
-    // Tổng số thẻ trong deck (sẽ được cập nhật khi thêm/xóa flashcard)
-    @Prop({ default: 0, min: 0 })
-    total_cards: number;
-
-    // Số lượng user đã học deck này (chỉ áp dụng cho public deck)
-    @Prop({ default: 0, min: 0 })
-    total_learners: number;
-
+    @Prop({ type: [FlashcardSchema], default: [] })
+    flashcards: Flashcard[];
 }
 
 export const FlashCardDeckSchema = SchemaFactory.createForClass(FlashCardDeck);
