@@ -18,6 +18,36 @@ export class CreateVocabularyDto {
     @IsString()
     type?: string;
 }
+
+export class CreateOptionDto {
+    @IsNotEmpty({ message: "Key không được để trống" })
+    @IsString()
+    key: string;
+
+    @IsNotEmpty({ message: "Text không được để trống" })
+    @IsString()
+    text: string;
+}
+
+export class CreateMutipleChoiceQuestionDto {
+    @IsNotEmpty({ message: "Số thứ tự câu hỏi không được để trống" })
+    @IsNumber()
+    question_number: number;
+
+    @IsNotEmpty({ message: "Nội dung câu hỏi không được để trống" })
+    @IsString()
+    question_text: string;
+
+    @IsNotEmpty({ message: "Các lựa chọn không được để trống" })
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => CreateOptionDto)
+    options: CreateOptionDto[];
+
+    @IsNotEmpty({ message: "Lựa chọn đúng không được để trống" })
+    @IsString()
+    correct_option: string;
+}
 export class CreateSpeakingExamDto {
 
     @IsNotEmpty({ message: "Tiêu đề không được để trống" })
@@ -69,4 +99,10 @@ export class CreateSpeakingExamDto {
     @ValidateNested({ each: true })
     @Type(() => CreateVocabularyDto)
     vocabularies?: CreateVocabularyDto[];
+
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => CreateMutipleChoiceQuestionDto)
+    multiple_choice_questions?: CreateMutipleChoiceQuestionDto[];
 }

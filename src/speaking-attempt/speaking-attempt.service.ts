@@ -11,6 +11,7 @@ import { ExamAttemptStatus, UserRole } from '@/utils/constants/enum';
 import dayjs from 'dayjs';
 import { calculateSkip, createPaginatedResponse } from '@/common/dto/pagination.dto';
 import { buildVietnameseRegex } from '@/utils/functions/function';
+import console from 'node:console';
 
 @Injectable()
 export class SpeakingAttemptService {
@@ -393,7 +394,10 @@ export class SpeakingAttemptService {
 
   async update(id: string, updateSpeakingAttemptDto: UpdateSpeakingAttemptDto) {
     try {
-      console.log(`Updating speaking attempt ${id} with data:`, updateSpeakingAttemptDto);
+      console.log("Updating speaking attempt", updateSpeakingAttemptDto.has_teacher_feedback);
+      if (updateSpeakingAttemptDto.multiple_choice_answers && updateSpeakingAttemptDto.multiple_choice_answers.length > 0) {
+        console.log("lala ", updateSpeakingAttemptDto.multiple_choice_answers);
+      }
       const updatedAttempt = await this.speakingAttemptModel.findByIdAndUpdate(id, {
         $set: {
           ...updateSpeakingAttemptDto

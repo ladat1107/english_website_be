@@ -11,7 +11,7 @@ export class SpeakingAttemptController {
   @Post()
   create(
     @Req() req: any,
-    @Body() createSpeakingAttemptDto: any
+    @Body() createSpeakingAttemptDto: CreateSpeakingAttemptDto
   ) {
     return this.speakingAttemptService.create(createSpeakingAttemptDto, req.user);
   }

@@ -17,6 +17,28 @@ class Question {
 
 const QuestionSchema = SchemaFactory.createForClass(Question);
 
+@Schema({ _id: false })
+class Option {
+    @Prop({ required: true })
+    key: string;
+
+    @Prop({ required: true })
+    text: string;
+}
+@Schema({ _id: false })
+class MutipleChoiceQuestion {
+    @Prop({ required: true, type: Number })
+    question_number: number;
+    @Prop({ required: true, type: String })
+    question_text: string;
+    @Prop({ required: true, type: [Option] })
+    options: Option[];
+    @Prop({ required: true, type: String })
+    correct_option: string;
+}
+
+const MutipleChoiceQuestionSchema = SchemaFactory.createForClass(MutipleChoiceQuestion);
+
 @Schema({ _id: true })
 class Vocabulary {
     @Prop({ required: true, type: String })
@@ -78,6 +100,9 @@ export class SpeakingExam {
 
     @Prop({ type: [VocabularySchema], default: [] })
     vocabularies: Vocabulary[];
+
+    @Prop({ type: [MutipleChoiceQuestionSchema], default: [] })
+    multiple_choice_questions: MutipleChoiceQuestion[];
 
     @Prop({ required: true, type: Boolean, default: false })
     is_published: boolean;

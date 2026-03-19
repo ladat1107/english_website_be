@@ -12,7 +12,6 @@ class QuestionSnapshot {
 
 const QuestionSnapshotSchema = SchemaFactory.createForClass(QuestionSnapshot);
 
-
 @Schema({ _id: false })
 class AIAnalysis {
     @Prop({ type: String })
