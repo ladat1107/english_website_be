@@ -53,7 +53,7 @@ export class SpeakingExamService {
       filter.type = type;
     }
 
-    if (user && user.role !== UserRole.ADMIN) {
+    if (!user || (user && user.role !== UserRole.ADMIN)) {
       filter.is_published = true;
     }
 
