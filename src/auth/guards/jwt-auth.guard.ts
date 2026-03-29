@@ -22,25 +22,34 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
             context.getClass(),
         ]);
 
+        const req = context.switchToHttp().getRequest();
+        // Gắn isPublic vào request để dùng ở handleRequest
+        req.isPublic = isPublic;
+
         if (isPublic) {
-            // cho phép vào nhưng vẫn check token nếu có
-            const req = context.switchToHttp().getRequest();
             const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req) || extractJwtFromCookie(req);
 
             if (token) {
                 return super.canActivate(context);
             }
-
             return true;
         }
 
         return super.canActivate(context);
     }
 
-    handleRequest(err, user, info) {
+    handleRequest(err, user, info, context: ExecutionContext) {
+        const req = context.switchToHttp().getRequest();
+
+        // Nếu route public → không throw lỗi token
+        if (req.isPublic) {
+            return user ?? null;
+        }
+
         if (err || !user) {
             throw new UnauthorizedException('INVALID_TOKEN');
         }
+
         return user;
     }
 }

@@ -10,6 +10,7 @@ import { calculateSkip, createPaginatedResponse } from '@/common/dto/pagination.
 import { UserRole } from '@/utils/constants/enum';
 import { buildVietnameseRegex } from '@/utils/functions/function';
 import { SpeakingAttemptService } from '@/speaking-attempt/speaking-attempt.service';
+import { title } from 'node:process';
 
 @Injectable()
 export class SpeakingExamService {
@@ -132,6 +133,17 @@ export class SpeakingExamService {
       throw error;
     } finally {
       session.endSession();
+    }
+  }
+
+  async findPublicSeo() {
+    try {
+      const exams = await this.speakingExamModel.find({ is_published: true })
+        .select("_id title topic updatedAt").exec();
+      return exams;
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách đề giao tiếp public SEO:", error);
+      throw error;
     }
   }
 }

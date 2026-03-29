@@ -1,8 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateSpeakingAttemptDto, MultipleChoiceAnswerDto } from './create-speaking-attempt.dto';
-import { IsArray, IsEnum, IsOptional, ValidateNested } from 'class-validator';
+import { IsArray, IsEnum, IsOptional, Max, Min, ValidateNested } from 'class-validator';
 import { ExamAttemptStatus } from '@/utils/constants/enum';
-import { MultipleChoiceAnswer } from '../schemas/speaking-attempt.schemas';
 import { Type } from 'class-transformer';
 
 export class UpdateSpeakingAttemptDto extends PartialType(CreateSpeakingAttemptDto) {
@@ -18,6 +17,11 @@ export class UpdateSpeakingAttemptDto extends PartialType(CreateSpeakingAttemptD
 
     @IsOptional()
     has_teacher_feedback?: boolean;
+
+    @IsOptional()
+    @Min(0, { message: 'Điểm phải từ 0 đến 100' })
+    @Max(100, { message: 'Điểm phải từ 0 đến 100' })
+    score?: number;
 
     @IsOptional()
     @IsArray()

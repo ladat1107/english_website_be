@@ -40,7 +40,7 @@ class MutipleChoiceQuestion {
 const MutipleChoiceQuestionSchema = SchemaFactory.createForClass(MutipleChoiceQuestion);
 
 @Schema({ _id: true })
-class Vocabulary {
+export class Vocabulary {
     @Prop({ required: true, type: String })
     vocabulary: string;
 
@@ -51,7 +51,7 @@ class Vocabulary {
     type: string; // Loại từ (danh từ, động từ, tính từ, v.v.)
 }
 
-const VocabularySchema = SchemaFactory.createForClass(Vocabulary);
+export const VocabularySchema = SchemaFactory.createForClass(Vocabulary);
 
 
 @Schema({ _id: false })

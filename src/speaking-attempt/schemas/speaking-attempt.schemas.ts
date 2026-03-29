@@ -3,7 +3,7 @@ import { HydratedDocument, Types } from "mongoose";
 import { ExamAttemptStatus } from "src/utils/constants/enum";
 
 @Schema({ _id: false })
-export class MultipleChoiceAnswer {
+class MultipleChoiceAnswer {
     @Prop({ type: Number, required: true })
     question_number: number;
 
@@ -11,7 +11,7 @@ export class MultipleChoiceAnswer {
     selected_option: string;
 }
 
-export const MultipleChoiceAnswerSchema = SchemaFactory.createForClass(MultipleChoiceAnswer);
+const MultipleChoiceAnswerSchema = SchemaFactory.createForClass(MultipleChoiceAnswer);
 
 export type SpeakingAttemptDocument = HydratedDocument<SpeakingAttempt>;
 @Schema({ timestamps: true })
@@ -37,6 +37,9 @@ export class SpeakingAttempt {
 
     @Prop({ type: Boolean, default: false })
     has_teacher_feedback: boolean;
+
+    @Prop({ type: Number, default: 0 })
+    score: number;
 
     @Prop({ type: [MultipleChoiceAnswerSchema], default: [] })
     multiple_choice_answers: MultipleChoiceAnswer[];

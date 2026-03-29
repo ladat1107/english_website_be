@@ -13,7 +13,7 @@ export class CreateVocabularyDto {
     @IsString()
     meaning: string;
 
-    // Loại từ (danh từ, động từ, tính từ, v.v.)
+    // từ loại Parts of Speech (verb, noun, adjective, adverb, preposition, conjunction, interjection) hoặc Chinese parts of speech
     @IsOptional()
     @IsString()
     type?: string;

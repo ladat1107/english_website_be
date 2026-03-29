@@ -1,5 +1,7 @@
 import { CreateChatAIDto } from '@/chat/dto/create-chat-ai.dto';
 import { CreateFlashcardDto } from '@/flash-card-deck/dto/create-flash-card-deck.dto';
+import { buildAnalysisPrompt } from '@/speaking-answer/dto/promt-speaking';
+import { buildWritingAnalysisPrompt } from '@/writing-answer/dto/promt-writing';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Groq from 'groq-sdk';
@@ -27,16 +29,10 @@ export class AIAnalysisService {
         this.groq = new Groq({ apiKey: this.configService.get<string>('groq.apiKey') });
     }
 
-    /**
-     * Phân tích văn bản bằng AI Groq
-     * @param transcript - Văn bản đã chuyển đổi từ giọng nói
-     * @param questionText - Câu hỏi gốc để AI hiểu ngữ cảnh
-     * @returns Kết quả phân tích bao gồm: transcript, improvement, error, ai_fix
-     */
     async analyzeTranscript(transcript: string, questionText: string): Promise<AIAnalysisResult> {
         try {
             // Tạo prompt chi tiết cho AI
-            const prompt = this.buildAnalysisPrompt(transcript, questionText);
+            const prompt = buildAnalysisPrompt(transcript, questionText);
 
             // Gọi AI để phân tích
             const completion = await this.groq.chat.completions.create({
@@ -76,77 +72,6 @@ Always respond in JSON format.`
                 ai_fix: transcript
             };
         }
-    }
-
-    /**
-     * Xây dựng prompt cho AI để phân tích văn bản
-     * @param transcript - Văn bản cần phân tích
-     * @param questionText - Câu hỏi gốc
-     * @returns Prompt hoàn chỉnh
-     */
-    private buildAnalysisPrompt(transcript: string, questionText: string): string {
-        return `
-You are a professional language teacher.
-
-The student might answer in:
-- English
-- Chinese
-- Vietnamese
-
-Detect the language automatically.
-
-IMPORTANT RULES:
-
-- The explanations for mistakes and improvement suggestions MUST be written in Vietnamese so the student can clearly understand the feedback.
-- The corrected answer (ai_fix) must be written in the SAME language as the student's response.
-
-Question:
-${questionText}
-
-Student Response:
-${transcript}
-
-Your task:
-
-1. Evaluate the response quality (grammar, vocabulary, clarity, fluency, relevance to question)
-
-2. Provide friendly and constructive feedback.
-
-3. Give a score from 0 to 100.
-
-Return ONLY JSON with this structure:
-
-{
-  "score": 85,
-  "improvement": ["gợi ý cải thiện bằng tiếng Việt"],
-  "error": ["giải thích lỗi bằng tiếng Việt"],
-  "ai_fix": "corrected and more natural version in the student's language"
-}
-
-Guidelines:
-
-- Score range: 0 - 100
-- 90-100: excellent answer
-- 70-89: good answer with minor mistakes
-- 50-69: understandable but several mistakes
-- 30-49: many mistakes
-- 0-29: very poor answer
-
-Feedback style:
-- Friendly
-- Encouraging
-- Clear and easy to understand
-- Maximum 4 improvements
-
-If the answer is good:
-- Praise the student
-- improvement can contain compliments (in Vietnamese)
-
-If no errors:
-- error should be []
-
-Return ONLY JSON.
-`;
     }
 
     /**
@@ -254,4 +179,40 @@ Return ONLY JSON.
         }
     }
 
+    async analysisWritingAnswer(answerText: string, questionText: string,): Promise<AIAnalysisResult> {
+        try {
+            const promt = buildWritingAnalysisPrompt(answerText, questionText);
+            const completion = await this.groq.chat.completions.create({
+                model: "llama-3.3-70b-versatile", // Model mạnh cho phân tích ngữ nghĩa
+                messages: [
+                    {
+                        role: "system",
+                        content: `You are an expert English and Chinese language teacher with over 10 years of experience in academic writing assessment.
+                        Evaluate student responses professionally and objectively.Provide feedback that is constructive, specific, and easy to understand.
+                        When there are no errors, give genuine praise and encouragement.
+                        Always respond in JSON format.`
+                    },
+                    {
+                        role: "user",
+                        content: promt
+                    }
+                ],
+                temperature: 0.3, // Độ sáng tạo vừa phải
+                max_tokens: 1500,
+                response_format: { type: "json_object" } // Yêu cầu trả về JSON
+            });
+
+            const aiResponse = JSON.parse(completion.choices[0]?.message?.content || '{}');
+
+            return this.formatAnalysisResult(aiResponse, answerText);
+        } catch (error) {
+            console.error('Error in AI analysis:', error);
+            return {
+                transcript: "",
+                improvement: ['Không thể phân tích lúc này, vui lòng thử lại sau.'],
+                error: [],
+                ai_fix: answerText
+            };
+        }
+    }
 }

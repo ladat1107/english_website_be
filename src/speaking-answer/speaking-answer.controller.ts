@@ -2,10 +2,19 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { SpeakingAnswerService } from './speaking-answer.service';
 import { CreateSpeakingAnswerDto } from './dto/create-speaking-answer.dto';
 import { UpdateSpeakingAnswerDto } from './dto/update-speaking-answer.dto';
+import { Public } from '@/common/decorators/public.decorator';
 
 @Controller('speaking-answer')
 export class SpeakingAnswerController {
   constructor(private readonly speakingAnswerService: SpeakingAnswerService) { }
+
+
+  @Post('analyse')
+  @Public()
+  async analyse(@Body() body: { answer: string, question: string }) {
+    const { answer, question } = body;
+    return this.speakingAnswerService.analyse(answer, question);
+  }
 
   @Patch(':id/ai-analysis')
   async updateAIAnalysis(@Param('id') id: string) {

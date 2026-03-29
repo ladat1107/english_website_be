@@ -55,7 +55,27 @@ export class SpeakingAnswerService {
         throw new Error('Không tìm thấy câu trả lời');
       }
 
-      await this.processAudioAnalysis(id, answer.audio_url, answer.question.question_text);
+      if (answer?.ai_analysis?.transcript) {
+        // Nếu đã có transcript, chỉ cần phân tích lại bằng AI mà không cần chuyển đổi giọng nói
+        const analysis = await this.aiAnalysisService.analyzeTranscript(
+          answer.ai_analysis.transcript,
+          answer.question.question_text
+        );
+        await this.speakingAnswerModel.findByIdAndUpdate(id, {
+          $set: {
+            ai_analysis: {
+              transcript: analysis.transcript,
+              improvement: analysis.improvement,
+              error: analysis.error,
+              ai_fix: analysis.ai_fix
+            },
+            score: analysis.score
+          }
+        });
+
+      } else {
+        await this.processAudioAnalysis(id, answer.audio_url, answer.question.question_text);
+      }
 
       return { message: 'AI analysis updated successfully' };
     } catch (error) {
@@ -84,9 +104,6 @@ export class SpeakingAnswerService {
         transcription.text,
         questionText
       );
-
-      // Bước 3: Tính điểm số dựa trên phân tích
-
 
       // Bước 4: Cập nhật kết quả vào database
       await this.speakingAnswerModel.findByIdAndUpdate(answerId, {
@@ -167,5 +184,13 @@ export class SpeakingAnswerService {
     return this.speakingAnswerModel
       .deleteMany({ attempt_id: { $in: attemptIds } })
       .session(session || null);
+  }
+
+  // Test hàm phân tích AI với input trực tiếp (không qua audio)
+  async analyse(answer: string, question: string) {
+    return this.aiAnalysisService.analyzeTranscript(
+      answer,
+      question
+    );
   }
 }

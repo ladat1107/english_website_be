@@ -4,6 +4,7 @@ import { CreateSpeakingExamDto } from './dto/create-speaking-exam.dto';
 import { UpdateSpeakingExamDto } from './dto/update-speaking-exam.dto';
 import { QuerySpeakingExamDto } from './dto/query-speaking-exam';
 import { Public } from '@/common/decorators/public.decorator';
+import { SkipResponseInterceptor } from '@/common/decorators/skip-response-interceptor.decorator';
 
 @Controller('speaking-exam')
 export class SpeakingExamController {
@@ -18,6 +19,13 @@ export class SpeakingExamController {
   @Public()
   findAll(@Req() req: any, @Query() query: QuerySpeakingExamDto) {
     return this.speakingExamService.findAll(query, req.user);
+  }
+
+  @Get('public-seo')
+  @Public()
+  @SkipResponseInterceptor()
+  findPublicSeo() {
+    return this.speakingExamService.findPublicSeo();
   }
 
   @Get(':id')

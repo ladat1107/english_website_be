@@ -13,7 +13,7 @@ class QuestionSnapshot {
 const QuestionSnapshotSchema = SchemaFactory.createForClass(QuestionSnapshot);
 
 @Schema({ _id: false })
-class AIAnalysis {
+export class AIAnalysis {
     @Prop({ type: String })
     transcript: string; // speech-to-text result
     @Prop({ type: [String] })
@@ -24,7 +24,7 @@ class AIAnalysis {
     ai_fix: string; // đoạn text AI sửa lại
 }
 
-const AIAnalysisSchema = SchemaFactory.createForClass(AIAnalysis);
+export const AIAnalysisSchema = SchemaFactory.createForClass(AIAnalysis);
 
 export type SpeakingAnswerDocument = HydratedDocument<SpeakingAnswer>;
 

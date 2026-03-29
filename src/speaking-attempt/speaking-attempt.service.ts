@@ -413,11 +413,30 @@ export class SpeakingAttemptService {
       console.error(`Error updating speaking attempt ${id}:`, error);
       throw error;
     }
-    return `This action updates a #${id} speakingAttempt`;
   }
 
   async remove(id: string) {
-    return `This action removes a #${id} speakingAttempt`;
+    const session = await this.speakingAttemptModel.db.startSession();
+    session.startTransaction();
+    try {
+      const attemtDeleted = await this.speakingAttemptModel.findByIdAndDelete(new Types.ObjectId(id), { session });
+      
+      if (!attemtDeleted) {
+        throw new BadRequestException('Không tìm thấy bài làm');
+      }
+      
+      await this.speakingAnswerService.removeByAttemptIds([new Types.ObjectId(id)], session);
+
+      await session.commitTransaction();
+      return attemtDeleted;
+
+    } catch (error) {
+      console.error(`Error removing speaking attempt ${id}:`, error);
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      await session.endSession();
+    }
   }
   async removeByExamId(examId: string, session?: ClientSession) {
     try {

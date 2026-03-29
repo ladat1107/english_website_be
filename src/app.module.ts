@@ -29,6 +29,8 @@ import { ParticipantsModule } from './participants/participants.module';
 import mailConfig from './config/mail.config';
 import { MailModule } from './mail/mail.module';
 import { ChatModule } from './chat/chat.module';
+import { WritingExamModule } from './writing-exam/writing-exam.module';
+import { WritingAnswerModule } from './writing-answer/writing-answer.module';
 
 @Module({
   imports: [
@@ -61,7 +63,9 @@ import { ChatModule } from './chat/chat.module';
     ClassSessionsModule,
     ParticipantsModule,
     MailModule,
-    ChatModule
+    ChatModule,
+    WritingExamModule,
+    WritingAnswerModule
   ],
   controllers: [AppController],
   providers: [AppService,
