@@ -1,6 +1,7 @@
 export const buildWritingAnalysisPrompt = (answer: string, questionText: string): string => {
-    return `
+  return `
 You are a professional English/Chinese academic writing coach specialized in evaluating written responses.
+You must evaluate the writing **strictly**, **logically**, and **with high standards**, similar to IELTS Writing / HSK Writing grading.
 
 ## CONTEXT
 - Question or Image Prompt: ${questionText}
@@ -33,7 +34,7 @@ Analyze the student's written response across these dimensions:
 ## STRICT OUTPUT RULES
 
 ### "error" field:
-- List specific and concrete grammar, vocabulary, or structural mistakes found in the student's writing
+- List **every** grammar/vocabulary/structural error found in the student's response
 - Quote the student's exact error when possible, then explain what is wrong
 - Each error MUST be explained in Vietnamese
 - Focus on mistakes that affect academic quality and clarity
@@ -44,7 +45,7 @@ Analyze the student's written response across these dimensions:
 - Focus on: sentence variety, formal vocabulary, stronger transitions, paragraph structure
 - Each suggestion MUST be written in Vietnamese
 - If the answer is excellent, include specific praise and encouragement in Vietnamese instead
-- Maximum 4 items
+- Maximum 4 items for improvement suggestions
 
 ### "ai_fix" field:
 - A fully corrected and academically improved version of the student's response
@@ -55,13 +56,38 @@ Analyze the student's written response across these dimensions:
 - Preserve the student's original ideas — only elevate the language and structure
 - Should read like a well-written academic paragraph or essay response
 
-### "score" field:
-- Integer from 0 to 100
-- 90–100: Excellent – academically strong, near error-free, well-structured
-- 70–89: Good – minor grammatical or stylistic issues, ideas are clear and relevant
-- 50–69: Average – understandable but noticeable grammar/structure issues affecting academic quality
-- 30–49: Below average – frequent errors, weak structure, unclear ideas
-- 0–29: Poor – very difficult to understand, major grammatical breakdowns
+### "score" field (STRICT GRADING):
+You MUST grade writing using these strict categories:
+
+- Grammar (0–25)
+  Evaluate based on correctness, sentence structure, punctuation, and error frequency.
+
+- Vocabulary (0–25)
+  Precision, academic appropriateness, lexical variety. 
+  Strong deduct if vocabulary is basic or repeatedly misused.
+
+- Coherence & Cohesion (0–20)
+  Logical flow, transitions, paragraph structure.
+
+- Clarity & Conciseness (0–20)
+  Avoid vague ideas, redundancy, unclear logic.
+
+- Relevance & Depth (0–10)
+  Depth of content, examples, and full response to the prompt.
+
+### Total score = sum of the five categories (0–100)
+
+### SCORING BANDS:
+- 90–100: Excellent — near error-free, strong academic tone, well-structured.
+- 70–89: Good — mostly clear; minor errors; acceptable academic quality.
+- 50–69: Average — noticeable grammar/structure issues; ideas somewhat underdeveloped.
+- 30–49: Below average — frequent errors; weak structure; unclear content.
+- 0–29: Poor — very difficult to understand, heavily flawed.
+
+### RELEVANCE RULE (CRITICAL):
+- If the response is **completely off-topic**, the score MUST NOT exceed **20**.
+- If **partially relevant**, the score MUST NOT exceed **50**.
+- If the response is **extremely short (<3 sentences)**, score MUST NOT exceed **40**.
 
 ## FEEDBACK STYLE
 - Professional yet encouraging tone

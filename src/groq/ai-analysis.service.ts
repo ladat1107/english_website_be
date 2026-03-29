@@ -43,6 +43,7 @@ export class AIAnalysisService {
                         content: `You are an expert language teacher who provides constructive, friendly, and natural feedback. 
 Your responses should be warm and conversational, like talking to a student. 
 When there are no errors, give genuine praise and encouragement.
+Be strict and apply high standards when scoring and evaluating responses, do not give high scores easily.
 Always respond in JSON format.`
                     },
                     {
@@ -190,6 +191,7 @@ Always respond in JSON format.`
                         content: `You are an expert English and Chinese language teacher with over 10 years of experience in academic writing assessment.
                         Evaluate student responses professionally and objectively.Provide feedback that is constructive, specific, and easy to understand.
                         When there are no errors, give genuine praise and encouragement.
+                        Be strict and apply high standards when scoring and evaluating responses, do not give high scores easily.
                         Always respond in JSON format.`
                     },
                     {
