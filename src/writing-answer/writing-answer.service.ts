@@ -11,6 +11,8 @@ import { AIAnalysisService } from '@/groq/ai-analysis.service';
 import dayjs from 'dayjs';
 import { buildVietnameseRegex } from '@/utils/functions/function';
 import { WritingExamService } from '@/writing-exam/writing-exam.service';
+import { MailService } from '@/mail/mail.service';
+import { GradingAssignmentMailContext } from '@/mail/mail.interface';
 
 @Injectable()
 export class WritingAnswerService {
@@ -18,7 +20,8 @@ export class WritingAnswerService {
     @InjectModel(WritingAnswer.name)
     private readonly writingAnswerModel: Model<WritingAnswerDocument>,
     private aiAnalysisService: AIAnalysisService,
-    
+    private mailService: MailService,
+
     @Inject(forwardRef(() => WritingExamService))
     private writingExamService: WritingExamService
   ) { }
@@ -42,6 +45,17 @@ export class WritingAnswerService {
         .catch(err => {
           console.error('Error processing writing analysis:', err);
         });
+    }
+
+    if (newAnswer) {
+      const context: GradingAssignmentMailContext = {
+        studentName: user.full_name,
+        exerciseTitle: writingExam.title,
+        completedAt: dayjs(newAnswer.submitted_at).format('DD/MM/YYYY HH:mm:ss'),
+        reviewUrl: `/quan-ly/luyen-viet/cham-bai/${newAnswer._id}`,
+        type: 'luyện viết'
+      }
+      this.mailService.sendGradingAssignmentMail(context);
     }
 
     return newAnswer;

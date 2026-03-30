@@ -17,6 +17,9 @@ export class WritingExam {
     @Prop({ required: false, type: [String], default: [] })
     images: string[];
 
+    @Prop({ required: false, type: String, default: '' })
+    suggest: string;
+
     @Prop({ required: true, type: String, enum: TypeLanguage })
     type: TypeLanguage;
 

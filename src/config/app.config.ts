@@ -7,4 +7,5 @@ export default registerAs('app', () => ({
     clientUrl: process.env.FRONTEND_URL,
 
     zaloGroupUrl: process.env.ZALO_GROUP_URL,
+    khailingoEmail: process.env.KHAILINGO_EMAIL,
 }));

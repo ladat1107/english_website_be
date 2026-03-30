@@ -4,11 +4,13 @@ import { SpeakingAttemptController } from './speaking-attempt.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { SpeakingAttemptSchema } from './schemas/speaking-attempt.schemas';
 import { SpeakingAnswerModule } from '@/speaking-answer/speaking-answer.module';
+import { MailModule } from '@/mail/mail.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: 'SpeakingAttempt', schema: SpeakingAttemptSchema }]),
     forwardRef(() => SpeakingAnswerModule),
+    MailModule,
   ],
   exports: [SpeakingAttemptService],
   controllers: [SpeakingAttemptController],

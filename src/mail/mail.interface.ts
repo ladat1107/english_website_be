@@ -15,3 +15,12 @@ export interface ClassScheduleMailContext {
     endTime: string;
     link: string;
 }
+
+// Mail khi có học viên làm bài thì gửi cho admin
+export interface GradingAssignmentMailContext {
+    studentName: string;
+    exerciseTitle: string;
+    completedAt: string;
+    reviewUrl: string;
+    type: string;
+}

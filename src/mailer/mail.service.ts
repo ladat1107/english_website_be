@@ -62,19 +62,19 @@ export class MailService {
 
         return compiledTemplate(context);
     }
-
+    // Gửi thông báo lịch học
     async sendClassScheduleMail(
         to: string,
         context: ClassScheduleMailContext,
     ) {
         await this.sendMail({
             to,
-            subject: 'Thông báo lịch học mới - Khailingo',
+            subject: 'Khailingo - Thông báo lịch học mới',
             template: 'class-schedule',
             context: {
                 ...context,
                 frontendUrl: this.configService.get('app.clientUrl'),
-                 zaloGroupUrl: this.configService.get<string>('app.zaloGroupUrl'),
+                zaloGroupUrl: this.configService.get<string>('app.zaloGroupUrl'),
             },
         });
     }

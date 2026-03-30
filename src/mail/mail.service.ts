@@ -10,7 +10,7 @@ import * as handlebars from 'handlebars';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { SendMailOptions } from './mail.interface';
+import { GradingAssignmentMailContext, SendMailOptions } from './mail.interface';
 
 /**
  * MailService chịu trách nhiệm gửi email thông qua Brevo API
@@ -29,7 +29,6 @@ export class MailService {
         this.brevoClient = new TransactionalEmailsApi();
 
         const apiKey = this.mailConfig.brevoApiKey;
-        console.log("mail.brevoApiKey: ", apiKey);
 
         if (!apiKey) {
             this.logger.error('Brevo API key is not configured');
@@ -99,5 +98,23 @@ export class MailService {
         const compiledTemplate = handlebars.compile(templateSource);
 
         return compiledTemplate(context);
+    }
+
+    // Gửi thông báo cho admin khi có học viên nộp bài
+    async sendGradingAssignmentMail(context: GradingAssignmentMailContext) {
+        const adminEmail = this.configService.get('app.khailingoEmail');
+        if (!adminEmail) {
+            this.logger.error('Admin email is not configured');
+            throw new Error('Admin email is not configured');
+        }
+        await this.sendMail({
+            to: adminEmail,
+            subject: 'Khailingo - Thông báo có bài tập mới cần chấm',
+            template: 'grading-assignment',
+            context: {
+                ...context,                
+                frontendUrl: this.configService.get('app.clientUrl'),
+            },
+        });
     }
 }

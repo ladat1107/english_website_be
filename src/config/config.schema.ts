@@ -32,4 +32,6 @@ export const configValidationSchema = Joi.object({
     BREVO_API_KEY: Joi.string().required(),
     MAIL_SENDER_NAME: Joi.string().required(),
     MAIL_SENDER_EMAIL: Joi.string().email().required(),
+
+    KHAILINGO_EMAIL: Joi.string().email().required(),
 });

@@ -18,7 +18,7 @@ export class SpeakingAttemptController {
 
   @Patch(':id/submit')
   submit(@Param('id') id: string, @Req() req: any) {
-    return this.speakingAttemptService.submitAttempt(id, req.user._id);
+    return this.speakingAttemptService.submitAttempt(id, req.user);
   }
 
   // =====================================================

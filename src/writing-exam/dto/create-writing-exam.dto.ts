@@ -14,6 +14,11 @@ export class CreateWritingExamDto {
     content: string; // trên giao diện là textarea, cho phép lưu xuống dòng, gạch đầu dòng, v.v.
 
     @IsOptional()
+    @IsString()
+    @MaxLength(1000, { message: "Nội dung gợi ý không được vượt quá 1000 ký tự" })
+    suggest: string; // trên giao diện là textarea, cho phép lưu xuống dòng, gạch đầu dòng, v.v.
+
+    @IsOptional()
     @IsArray()
     @IsString({ each: true })
     images?: string[]; // bỏ qua không để vào postman

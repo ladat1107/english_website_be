@@ -12,6 +12,9 @@ import dayjs from 'dayjs';
 import { calculateSkip, createPaginatedResponse } from '@/common/dto/pagination.dto';
 import { buildVietnameseRegex } from '@/utils/functions/function';
 import console from 'node:console';
+import { MailService } from '@/mail/mail.service';
+import { GradingAssignmentMailContext } from '@/mail/mail.interface';
+import { SpeakingExam } from '@/speaking-exam/schemas/speaking-exam.schemas';
 
 @Injectable()
 export class SpeakingAttemptService {
@@ -20,6 +23,7 @@ export class SpeakingAttemptService {
     @InjectModel(SpeakingAttempt.name)
 
     private readonly speakingAttemptModel: Model<SpeakingAttempt>,
+    private mailService: MailService,
 
     @Inject(forwardRef(() => SpeakingAnswerService))
     private speakingAnswerService: SpeakingAnswerService,
@@ -72,16 +76,28 @@ export class SpeakingAttemptService {
     }
   }
 
-  async submitAttempt(attemptId: string, userId: string) {
+  async submitAttempt(attemptId: string, user: JwtPayload) {
     try {
       const attempt = await this.speakingAttemptModel.findOneAndUpdate({
         _id: new Types.ObjectId(attemptId),
-        user_id: new Types.ObjectId(userId)
+        user_id: new Types.ObjectId(user._id)
       }, {
         status: ExamAttemptStatus.COMPLETED,
         submitted_at: dayjs()
       }, { new: true }
-      );
+      ).populate("exam_id").lean();
+
+      if (attempt) {
+        const exam = attempt.exam_id as unknown as SpeakingExam;
+        const context: GradingAssignmentMailContext = {
+          studentName: user.full_name,
+          exerciseTitle: exam.title,
+          completedAt: dayjs(attempt.submitted_at).format('DD/MM/YYYY HH:mm:ss'),
+          reviewUrl: `/quan-ly/giao-tiep/cham-bai/${attempt._id}`,
+          type: 'luyện nói'
+        }
+        this.mailService.sendGradingAssignmentMail(context)
+      }
 
       return attempt;
     } catch (error) {
@@ -420,11 +436,11 @@ export class SpeakingAttemptService {
     session.startTransaction();
     try {
       const attemtDeleted = await this.speakingAttemptModel.findByIdAndDelete(new Types.ObjectId(id), { session });
-      
+
       if (!attemtDeleted) {
         throw new BadRequestException('Không tìm thấy bài làm');
       }
-      
+
       await this.speakingAnswerService.removeByAttemptIds([new Types.ObjectId(id)], session);
 
       await session.commitTransaction();

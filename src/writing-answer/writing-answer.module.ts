@@ -5,13 +5,14 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { WritingAnswer, WritingAnswerSchema } from './schemas/writing-answer.schemas';
 import { GroqModule } from '@/groq/groq.module';
 import { WritingExamModule } from '@/writing-exam/writing-exam.module';
-
+import { MailModule } from '@/mail/mail.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: WritingAnswer.name, schema: WritingAnswerSchema },
     ]),
     GroqModule,
+    MailModule,
     forwardRef(() => WritingExamModule),
   ],
   controllers: [WritingAnswerController],

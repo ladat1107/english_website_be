@@ -1,3 +1,4 @@
+import { SpeakingExam } from "@/speaking-exam/schemas/speaking-exam.schemas";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
 import { ExamAttemptStatus } from "src/utils/constants/enum";
@@ -20,7 +21,7 @@ export class SpeakingAttempt {
     user_id: Types.ObjectId;
 
     @Prop({ type: Types.ObjectId, ref: 'SpeakingExam', required: true })
-    exam_id: Types.ObjectId;
+    exam_id: Types.ObjectId | SpeakingExam;
 
     @Prop({
         type: String,
