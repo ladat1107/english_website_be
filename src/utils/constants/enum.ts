@@ -83,12 +83,22 @@ export enum TypeLanguage {
 }
 
 export enum FlashcardTopic {
-  BASIC = "basic",           // Cơ bản
-  ADVANCED = "advanced",     // Nâng cao
-  TOEIC = "toeic",           // Ôn thi TOEIC
-  IELTS = "ielts",           // Ôn thi IELTS
-  HSK = "hsk",               // Ôn thi HSK
-  ACADEMIC = "academic",     // Học thuật
-  DAILY = "daily",           // Giao tiếp
-  MIXED = "mixed",           // Hỗn hợp
+    BASIC = "basic",           // Cơ bản
+    ADVANCED = "advanced",     // Nâng cao
+    TOEIC = "toeic",           // Ôn thi TOEIC
+    IELTS = "ielts",           // Ôn thi IELTS
+    HSK = "hsk",               // Ôn thi HSK
+    ACADEMIC = "academic",     // Học thuật
+    DAILY = "daily",           // Giao tiếp
+    MIXED = "mixed",           // Hỗn hợp
+}
+
+export enum BlogCategory {
+    NEWS = 'news',
+    OVERVIEW = 'overview',
+    IELTS_TIPS = 'ielts_tips',
+    STUDY_GUIDE = 'study_guide',
+    GRAMMAR = 'grammar',
+    VOCABULARY = 'vocabulary',
+    ANNOUNCEMENT = 'announcement',
 }

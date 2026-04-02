@@ -31,6 +31,7 @@ import { MailModule } from './mail/mail.module';
 import { ChatModule } from './chat/chat.module';
 import { WritingExamModule } from './writing-exam/writing-exam.module';
 import { WritingAnswerModule } from './writing-answer/writing-answer.module';
+import { BlogModule } from './blog/blog.module';
 
 @Module({
   imports: [
@@ -65,7 +66,8 @@ import { WritingAnswerModule } from './writing-answer/writing-answer.module';
     MailModule,
     ChatModule,
     WritingExamModule,
-    WritingAnswerModule
+    WritingAnswerModule,
+    BlogModule
   ],
   controllers: [AppController],
   providers: [AppService,
